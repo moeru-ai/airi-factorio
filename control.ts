@@ -408,7 +408,10 @@ script.on_event(defines.events.on_script_path_request_finished, (event: OnScript
   if (!event.path) {
     log('[AUTORIO] Path calculation failed, switching to direct walking')
     player_state.task_state = TaskStates.WALKING_DIRECT
-    player_state.parameters_walk_to_entity.calculating_path = false
+    player_state.parameters_walking_direct = {
+      target_position: player_state.parameters_walk_to_entity.target_position,
+    }
+    player_state.parameters_walk_to_entity = undefined
     return
   }
 
@@ -449,7 +452,7 @@ function state_walking_to_entity(player: LuaPlayer) {
   const entities = player.surface.find_entities_filtered({
     position: player.position,
     radius: player_state.parameters_walk_to_entity.search_radius,
-    name: player_state.parameters_walk_to_entity.entity_name,
+    name: player_state.parameters_walk_to_entity.entity_name, // TODO: catch entity name not found error
   })
   if (entities.length === 0) {
     log('[AUTORIO] No entities found, reverting to IDLE state')
@@ -459,7 +462,7 @@ function state_walking_to_entity(player: LuaPlayer) {
   }
 
   for (const entity of entities) {
-    const distance = (entity.position.x - player.position.x) ^ 2 + (entity.position.y - player.position.y) ^ 2
+    const distance = (entity.position.x - player.position.x) ** 2 + (entity.position.y - player.position.y) ** 2
     if (distance < min_distance) {
       min_distance = distance
       nearest_entity = entity
@@ -528,7 +531,7 @@ function state_walking_to_entity(player: LuaPlayer) {
 
   if (player_state.parameters_walk_to_entity.path && nearest_entity) {
     if (!player_state.parameters_walk_to_entity.path_drawn) {
-      for (let i = 1; i <= player_state.parameters_walk_to_entity.path.length - 1; i++) {
+      for (let i = 0; i < player_state.parameters_walk_to_entity.path.length - 1; i++) {
         rendering.draw_line({
           color: { r: 0, g: 1, b: 0 },
           width: 2,
@@ -546,7 +549,7 @@ function state_walking_to_entity(player: LuaPlayer) {
     const path = player_state.parameters_walk_to_entity.path
     const path_index = player_state.parameters_walk_to_entity.path_index
 
-    if (path_index <= path.length && math.sqrt((nearest_entity.position.x - player.position.x) ^ 2 + (nearest_entity.position.y - player.position.y) ^ 2) > 1) {
+    if (path_index < path.length && math.sqrt((nearest_entity.position.x - player.position.x) ** 2 + (nearest_entity.position.y - player.position.y) ** 2) > 1) {
       const next_position = path[path_index].position
       const direction = get_direction(player.position, next_position)
 
@@ -555,11 +558,11 @@ function state_walking_to_entity(player: LuaPlayer) {
         direction,
       }
 
-      if (((next_position.x - player.position.x) ^ 2 + (next_position.y - player.position.y) ^ 2) < 0.01) {
+      if (((next_position.x - player.position.x) ** 2 + (next_position.y - player.position.y) ** 2) < 0.01) {
         player_state.parameters_walk_to_entity.path_index = path_index + 1
         log(`[AUTORIO] Moving to next path index: ${player_state.parameters_walk_to_entity.path_index}`)
       }
-      if (((nearest_entity.position.x - player.position.x) ^ 2 + (nearest_entity.position.y - player.position.y) ^ 2) < 2) {
+      if (((nearest_entity.position.x - player.position.x) ** 2 + (nearest_entity.position.y - player.position.y) ** 2) < 2) {
         player_state.task_state = TaskStates.IDLE
         player_state.parameters_walk_to_entity = undefined
         log('[AUTORIO] Reached target entity, switching to IDLE state')
@@ -897,7 +900,7 @@ function state_walking_direct(player: LuaPlayer) {
       direction,
     }
 
-    if (((target.x - player.position.x) ^ 2 + (target.y - player.position.y) ^ 2) < 2) {
+    if (((target.x - player.position.x) ** 2 + (target.y - player.position.y) ** 2) < 2) {
       log('[AUTORIO] Reached target, switching to IDLE state')
       player_state.task_state = TaskStates.IDLE
       player_state.parameters_walking_direct = undefined
@@ -910,14 +913,19 @@ function state_walking_direct(player: LuaPlayer) {
   }
 }
 
+let no_player_found = false
+
 script.on_event(defines.events.on_tick, (unused_event) => {
   if (!setup_complete) {
     setup()
   }
 
   const player = game.connected_players[0]
-  if (!player || !player.character) {
-    log('[AUTORIO] No valid player found')
+  if (player === undefined || player.character === undefined) {
+    if (!no_player_found) {
+      log('[AUTORIO] No valid player found')
+      no_player_found = true
+    }
     return
   }
 
