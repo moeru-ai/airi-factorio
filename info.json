@@ -1,0 +1,9 @@
+{
+  "name": "autorio",
+  "version": "0.1.0",
+  "title": "autorio",
+  "author": ["LemonNekoGH", "naklecha"],
+  "factorio_version": "1.1",
+  "dependencies": ["base >= 1.1"],
+  "description": "an automation mod for factorio."
+}
