@@ -98,7 +98,8 @@ const player_state: PlayerState = {
 }
 
 function log_player_info(player_id: number) {
-  const player = game.connected_players[player_id]
+  // compact for lua array index
+  const player = game.connected_players[player_id - 1]
   const log_data: {
     name: string
     position: MapPosition
@@ -623,6 +624,8 @@ function state_mining(player: LuaPlayer) {
 function state_placing(player: LuaPlayer) {
   if (!player) {
     log('[AUTORIO] Invalid player, ending PLACING task')
+    player_state.task_state = TaskStates.IDLE
+    player_state.parameters_place_entity = undefined
     return [false, 'Invalid player']
   }
 
@@ -636,24 +639,32 @@ function state_placing(player: LuaPlayer) {
 
   if (!inventory) {
     log('[AUTORIO] Cannot access player inventory, ending PLACING task')
+    player_state.task_state = TaskStates.IDLE
+    player_state.parameters_place_entity = undefined
     return [false, 'Cannot access player inventory']
   }
 
   const entity_prototype = prototypes.entity[player_state.parameters_place_entity.entity_name]
   if (!entity_prototype || !entity_prototype.items_to_place_this) {
     log('[AUTORIO] Invalid entity name, ending PLACING task')
+    player_state.task_state = TaskStates.IDLE
+    player_state.parameters_place_entity = undefined
     return [false, 'Invalid entity name']
   }
 
   const item_name = entity_prototype.items_to_place_this[0]
   if (!item_name) {
     log('[AUTORIO] Invalid entity name, ending PLACING task')
+    player_state.task_state = TaskStates.IDLE
+    player_state.parameters_place_entity = undefined
     return [false, 'Invalid entity name']
   }
 
   const [item_stack, unused_count] = inventory.find_item_stack(player_state.parameters_place_entity.entity_name)
   if (!item_stack) {
     log('[AUTORIO] Entity not found in inventory, ending PLACING task')
+    player_state.task_state = TaskStates.IDLE
+    player_state.parameters_place_entity = undefined
     return [false, 'Entity not found in inventory']
   }
 
@@ -661,6 +672,8 @@ function state_placing(player: LuaPlayer) {
     player_state.parameters_place_entity.position = surface.find_non_colliding_position(player_state.parameters_place_entity.entity_name, player.position, 1, 1)
     if (!player_state.parameters_place_entity.position) {
       log('[AUTORIO] Could not find a valid position to place the entity, ending PLACING task')
+      player_state.task_state = TaskStates.IDLE
+      player_state.parameters_place_entity = undefined
       return [false, 'Could not find a valid position to place the entity']
     }
   }
