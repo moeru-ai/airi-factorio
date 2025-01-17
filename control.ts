@@ -5,6 +5,7 @@ import type {
   EquipmentPosition,
   LuaEntity,
   LuaPlayer,
+  OnPlayerCraftedItemEvent,
   OnPlayerMinedEntityEvent,
   OnScriptPathRequestFinishedEvent,
   PathfinderWaypoint,
@@ -299,12 +300,22 @@ remote.add_interface('autorio_tasks', {
       return [false, 'Recipe not unlocked']
     }
 
+    if (!check_can_craft(player, item_name, count)) {
+      return [false, 'Not enough ingredients']
+    }
+
     player_state.task_state = TaskStates.CRAFTING
     player_state.parameters_craft_item = {
       item_name,
       count,
       crafted: 0,
     }
+
+    player.begin_crafting({
+      recipe: item_name,
+      count,
+    })
+
     log(`[AUTORIO] New craft_item task: ${item_name} x${count}`)
     return [true, 'Task started']
   },
@@ -429,7 +440,7 @@ script.on_event(defines.events.on_player_mined_entity, (unused_event: OnPlayerMi
 })
 
 function setup() {
-  const surface = game.surfaces[0]
+  const surface = game.surfaces[1]
   const enemies = surface.find_entities_filtered({ force: 'enemy' })
   log(`[AUTORIO] Removing ${enemies.length} enemies`)
   for (const enemy of enemies) {
@@ -801,19 +812,12 @@ function state_auto_inserting(player: LuaPlayer) {
   }
 }
 
-function state_crafting(player: LuaPlayer) {
-  if (!player_state.parameters_craft_item) {
-    log('[AUTORIO] No parameters found when crafting')
-    return
-  }
-
-  const recipe = player.force.recipes[player_state.parameters_craft_item.item_name]
+function check_can_craft(player: LuaPlayer, item_name: string, count: number) {
+  const recipe = player.force.recipes[item_name]
 
   if (!recipe) {
-    log('[AUTORIO] Recipe not found, ending task')
-    player_state.task_state = TaskStates.IDLE
-    player_state.parameters_craft_item = undefined
-    return
+    log(`[AUTORIO] No such recipe: ${item_name}`)
+    return false
   }
 
   const ingredients = recipe.ingredients
@@ -821,47 +825,26 @@ function state_crafting(player: LuaPlayer) {
 
   if (!player_inventory) {
     log('[AUTORIO] Cannot access player inventory, ending CRAFTING task')
-    player_state.task_state = TaskStates.IDLE
-    player_state.parameters_craft_item = undefined
-    return
+    return false
   }
 
-  let can_craft = true
+  const not_enough_ingredients: { name: string, amount: number }[] = []
 
+  // TODO check dependencies
   for (const ingredient of ingredients) {
-    if (player_inventory.get_item_count(ingredient.name) < ingredient.amount) {
-      can_craft = false
-      log(`[AUTORIO] Not enough ${ingredient.name} to craft ${player_state.parameters_craft_item.item_name}`)
-      break
+    const item_count = player_inventory.get_item_count(ingredient.name)
+
+    if (item_count < ingredient.amount * count) {
+      not_enough_ingredients.push({ name: ingredient.name, amount: ingredient.amount * count - item_count })
     }
   }
 
-  if (can_craft) {
-    for (const ingredient of ingredients) {
-      player_inventory.remove({ name: ingredient.name, count: ingredient.amount })
-    }
-
-    recipe.products.forEach((product) => {
-      if (product.type === 'item' && player_state.parameters_craft_item) {
-        player.insert({ name: product.name, count: product.amount })
-
-        player_state.parameters_craft_item.crafted = player_state.parameters_craft_item.crafted + 1
-
-        log(`[AUTORIO] Crafted 1 ${player_state.parameters_craft_item.item_name}`)
-
-        if (player_state.parameters_craft_item.crafted >= player_state.parameters_craft_item.count) {
-          log('[AUTORIO] Crafting task complete')
-          player_state.task_state = TaskStates.IDLE
-          player_state.parameters_craft_item = undefined
-        }
-      }
-    })
+  if (not_enough_ingredients.length > 0) {
+    log(`[AUTORIO] No enough ingredients to craft ${item_name}: ${serpent.line(not_enough_ingredients)}`)
+    return false
   }
-  else {
-    log('[AUTORIO] Not enough ingredients to craft, ending task')
-    player_state.task_state = TaskStates.IDLE
-    player_state.parameters_craft_item = undefined
-  }
+
+  return true
 }
 
 function state_researching(player: LuaPlayer) {
@@ -948,13 +931,33 @@ script.on_event(defines.events.on_tick, (unused_event) => {
   else if (player_state.task_state === TaskStates.PICKING_UP) {
     state_picking_up(player)
   }
-  else if (player_state.task_state === TaskStates.CRAFTING) {
-    state_crafting(player)
-  }
   else if (player_state.task_state === TaskStates.RESEARCHING) {
     state_researching(player)
   }
   else if (player_state.task_state === TaskStates.WALKING_DIRECT) {
     state_walking_direct(player)
+  }
+})
+
+script.on_event(defines.events.on_player_crafted_item, (event: OnPlayerCraftedItemEvent) => {
+  // compact for lua array index
+  log(`[AUTORIO] Player ${game.connected_players[event.player_index - 1].name} crafted item: ${event.item_stack.name}`) // TODO: determine player index
+
+  if (!player_state.parameters_craft_item) {
+    log('[AUTORIO] No parameters found when item crafted')
+    return
+  }
+
+  if (player_state.task_state !== TaskStates.CRAFTING) {
+    return
+  }
+
+  player_state.parameters_craft_item.crafted = player_state.parameters_craft_item.crafted + 1
+  log(`[AUTORIO] Crafted 1 ${player_state.parameters_craft_item.item_name}, remaining: ${player_state.parameters_craft_item.count - player_state.parameters_craft_item.crafted}`)
+
+  if (player_state.parameters_craft_item.crafted >= player_state.parameters_craft_item.count) {
+    log('[AUTORIO] Crafting task complete')
+    player_state.task_state = TaskStates.IDLE
+    player_state.parameters_craft_item = undefined
   }
 })
