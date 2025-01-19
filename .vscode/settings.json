@@ -1,0 +1,8 @@
+{
+  "cSpell.words": [
+    "AUTORIO"
+  ],
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit"
+  }
+}

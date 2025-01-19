@@ -8,90 +8,13 @@ import type {
   OnPlayerCraftedItemEvent,
   OnPlayerMinedEntityEvent,
   OnScriptPathRequestFinishedEvent,
-  PathfinderWaypoint,
   SurfaceCreateEntity,
 } from 'factorio:runtime'
 
-enum TaskStates {
-  IDLE,
-  WALKING_TO_ENTITY,
-  MINING,
-  PLACING,
-  PLACING_IN_CHEST,
-  PICKING_UP,
-  CRAFTING,
-  RESEARCHING,
-  WALKING_DIRECT,
-  AUTO_INSERTING,
-  ATTACKING,
-}
-
-interface PlayerParametersWalkToEntity {
-  entity_name: string
-  search_radius: number
-  path: PathfinderWaypoint[] | null
-  path_drawn: boolean
-  path_index: number
-  calculating_path: boolean
-  should_mine: boolean
-  target_position: MapPositionStruct | null
-}
-
-interface PlayerParametersWalkingDirect {
-  target_position: MapPositionStruct | null
-}
-
-interface PlayerParametersMineEntity {
-  entity_name: string
-}
-
-interface PlayerParametersPlaceEntity {
-  entity_name: string
-  position?: MapPositionStruct
-}
-
-interface PlayerParametersAutoInsertNearby {
-  item_name: string
-  entity_name: string
-  max_count: number
-}
-
-interface PlayerParametersPickupItem {
-  item_name: string
-  count: number
-  container_name: string
-  search_radius: number
-}
-
-interface PlayerParametersCraftItem {
-  item_name: string
-  count: number
-  crafted: number
-}
-
-interface PlayerParametersAttackNearestEnemy {
-  search_radius: number
-  target: LuaEntity | null
-}
-
-interface PlayerParametersResearchTechnology {
-  technology_name: string
-}
+import type { PlayerState } from './types'
+import { TaskStates } from './types'
 
 let setup_complete = false
-
-interface PlayerState {
-  task_state: TaskStates
-  parameters_walk_to_entity?: PlayerParametersWalkToEntity
-  parameters_walking_direct?: PlayerParametersWalkingDirect
-  parameters_mine_entity?: PlayerParametersMineEntity
-  parameters_place_entity?: PlayerParametersPlaceEntity
-  parameters_auto_insert_nearby?: PlayerParametersAutoInsertNearby
-  parameters_pickup_item?: PlayerParametersPickupItem
-  parameters_craft_item?: PlayerParametersCraftItem
-  parameters_attack_nearest_enemy?: PlayerParametersAttackNearestEnemy
-  parameters_research_technology?: PlayerParametersResearchTechnology
-}
 
 const player_state: PlayerState = {
   task_state: TaskStates.IDLE,

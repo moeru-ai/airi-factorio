@@ -1,5 +1,6 @@
 {
   "name": "autorio.ts",
+  "type": "module",
   "version": "1.0.0",
   "packageManager": "pnpm@9.15.4",
   "description": "An automation mod for Factorio written in TypeScript.",
@@ -7,25 +8,36 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/LemonNekoGH/autorio.ts"
+    "url": "https://github.com/moeru-ai/airi-factorio"
   },
   "keywords": [
     "factorio",
     "automation",
-    "mod",
     "typescript"
   ],
-  "main": "index.js",
   "scripts": {
-    "build": "tstl",
-    "dev": "tstl --watch"
+    "build": "pnpm build:packages",
+    "dev": "pnpm dev:packages",
+    "build:packages": "pnpm -r --filter=./packages/* run build",
+    "dev:packages": "pnpm -r --filter=./packages/* run dev",
+    "lint": "eslint --cache .",
+    "lint:fix": "eslint --cache --fix ."
   },
   "devDependencies": {
     "@antfu/eslint-config": "^3.14.0",
+    "@antfu/ni": "^23.2.0",
     "eslint": "^9.18.0",
-    "lua-types": "^2.13.1",
-    "typed-factorio": "^3.11.0",
-    "typescript": "^5.7.3",
-    "typescript-to-lua": "^1.29.1"
-  }
+    "simple-git-hooks": "^2.11.1",
+    "taze": "^18.2.0",
+    "typescript": "~5.7.3"
+  },
+  "simple-git-hooks": {
+    "pre-commit": "pnpm lint-staged && pnpm typecheck"
+  },
+  "lint-staged": {
+    "*": "eslint --fix"
+  },
+  "workspaces": [
+    "packages/*"
+  ]
 }

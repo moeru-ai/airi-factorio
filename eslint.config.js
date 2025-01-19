@@ -2,17 +2,25 @@ import antfu from '@antfu/eslint-config'
 
 export default antfu({
   rules: {
+    'ts/naming-convention': 'off',
+  },
+}, {
+  rules: {
+    'ts/naming-convention': 'error',
+  },
+  files: ['**/*.ts'],
+}, {
+  rules: {
     'ts/naming-convention': [
       'error',
       {
         selector: [
           'property',
           'parameter',
-          'variable'
+          'variable',
         ],
         format: ['snake_case'],
       },
-
     ],
     // rule conflict with ts/naming-convention when using snake_case
     'unused-imports/no-unused-vars': [
@@ -20,8 +28,11 @@ export default antfu({
       {
         argsIgnorePattern: '^unused_',
         destructuredArrayIgnorePattern: '^unused_',
-      }
-    ]
+      },
+    ],
   },
+  files: [
+    'packages/autorio/**/*.ts',
+    'packages/chat-bridge/**/*.ts',
+  ],
 })
-
