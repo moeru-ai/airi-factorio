@@ -2,7 +2,7 @@
   "name": "autorio.ts",
   "type": "module",
   "version": "1.0.0",
-  "packageManager": "pnpm@9.15.4",
+  "packageManager": "pnpm@10.0.0",
   "description": "An automation mod for Factorio written in TypeScript.",
   "author": "LemonNekoGH",
   "license": "MIT",
