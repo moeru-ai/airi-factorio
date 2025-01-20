@@ -3,6 +3,7 @@
   "build": {
     "dockerfile": "Dockerfile"
   },
+  "runArgs": ["--network=host"],
   "customizations": {
     "vscode": {
       "extensions": [

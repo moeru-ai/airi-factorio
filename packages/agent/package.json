@@ -1,5 +1,6 @@
 {
   "name": "@moeru-ai/factorio-agent",
+  "type": "module",
   "version": "0.1.0",
   "packageManager": "pnpm@10.0.0",
   "description": "An agent for Factorio written in TypeScript.",
@@ -12,14 +13,21 @@
     "typescript"
   ],
   "scripts": {
-    "build": "unbuild"
+    "build": "unbuild",
+    "dev": "dotenvx run -f .env -f .env.local --overload --debug -- tsx src/main.ts",
+    "start": "dotenvx run -f .env -f .env.local --overload -- tsx src/main.ts"
   },
   "dependencies": {
+    "@dotenvx/dotenvx": "^1.33.0",
+    "@guiiai/logg": "^1.0.7",
+    "@xsai/generate-text": "^0.0.29",
+    "@xsai/providers": "^0.0.29",
     "execa": "^9.5.2",
-    "factorio-rcon-api-client": "^2.0.4",
-    "xsai": "^0.0.29"
+    "factorio-rcon-api-client": "^2.0.4"
   },
   "devDependencies": {
+    "@types/node": "^22.10.7",
+    "tsx": "^4.19.2",
     "unbuild": "^3.3.1"
   }
 }
