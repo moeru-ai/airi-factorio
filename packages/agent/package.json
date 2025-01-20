@@ -1,0 +1,25 @@
+{
+  "name": "@moeru-ai/factorio-agent",
+  "version": "0.1.0",
+  "packageManager": "pnpm@10.0.0",
+  "description": "An agent for Factorio written in TypeScript.",
+  "author": "LemonNekoGH",
+  "license": "MIT",
+  "keywords": [
+    "factorio",
+    "llm",
+    "agent",
+    "typescript"
+  ],
+  "scripts": {
+    "build": "unbuild"
+  },
+  "dependencies": {
+    "execa": "^9.5.2",
+    "factorio-rcon-api-client": "^2.0.4",
+    "xsai": "^0.0.29"
+  },
+  "devDependencies": {
+    "unbuild": "^3.3.1"
+  }
+}
