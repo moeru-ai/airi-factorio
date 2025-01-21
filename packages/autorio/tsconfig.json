@@ -3,14 +3,19 @@
   "compilerOptions": {
     "target": "ESNext",
     "lib": ["ESNext"],
+    "rootDir": "./src",
     "moduleResolution": "Node",
     "types": [
       "typed-factorio/runtime",
       "lua-types/jit"
     ],
-    "strict": true
+    "strict": true,
+    "outDir": "./dist"
   },
   "tstl": {
     "luaTarget": "JIT"
-  }
+  },
+  "include": [
+    "src/**/*.ts"
+  ]
 }
