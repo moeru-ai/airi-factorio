@@ -1,5 +1,5 @@
 # Factorio does not have stable support for arm64
-FROM --platform=linux/amd64 factoriotools/factorio:2.0.28
+FROM --platform=linux/amd64 factoriotools/factorio:2.0.30
 
 # install nodejs
 RUN curl -fsSL https://deb.nodesource.com/setup_22.x | bash -

@@ -15,8 +15,7 @@ Symlink the mods to your Factorio mod folder:
 ```bash
 cd /path/to/airi-factorio
 
-ln -s /path/to/airi-factorio/packages/autorio/src /path/to/factorio/data/autorio
-ln -s /path/to/airi-factorio/packages/chat-bridge/src /path/to/factorio/data/chat-bridge
+ln -s /path/to/airi-factorio/packages/autorio/dist /path/to/factorio/data/autorio
 ```
 
 Install dependencies:

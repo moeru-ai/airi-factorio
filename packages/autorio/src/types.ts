@@ -32,6 +32,7 @@ export interface PlayerParametersWalkingDirect {
 
 export interface PlayerParametersMineEntity {
   entity_name: string
+  position?: MapPositionStruct
 }
 
 export interface PlayerParametersPlaceEntity {

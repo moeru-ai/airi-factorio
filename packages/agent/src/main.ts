@@ -18,20 +18,25 @@ async function main() {
 
   const gameLogger = useLogg('game').useGlobalConfig()
 
-  for await (const line of execa(factorioConfig.path, [
+  // TODO: how to restart factorio when mod changes? And is this necessary?
+  const factorioInst = execa(factorioConfig.path, [
     '--start-server',
     factorioConfig.savePath,
     '--rcon-password',
     factorioConfig.rconPassword,
     '--rcon-port',
     factorioConfig.rconPort.toString(),
-  ])) {
-    const chatMessage = parseChatMessage(line)
-    if (!chatMessage) {
-      logger.log('Other message', line)
+  ], {
+    stdout: ['pipe', 'inherit'],
+  })
 
+  for await (const line of factorioInst.iterable()) {
+    const chatMessage = parseChatMessage(line)
+
+    if (!chatMessage) {
       continue
     }
+
     if (chatMessage.isServer) {
       continue
     }

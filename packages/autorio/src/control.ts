@@ -8,6 +8,7 @@ import type {
   OnPlayerCraftedItemEvent,
   OnPlayerMinedEntityEvent,
   OnScriptPathRequestFinishedEvent,
+  OnSelectedEntityChangedEvent,
   SurfaceCreateEntity,
 } from 'factorio:runtime'
 
@@ -324,10 +325,26 @@ function get_direction(start_position: MapPositionStruct, end_position: MapPosit
 }
 
 function start_mining(player: LuaPlayer, entity_position: MapPositionStruct) {
+  log(`[AUTORIO] current mining state: ${serpent.line(player.mining_state)}`)
+
   player.update_selected_entity(entity_position)
   player.mining_state = { mining: true, position: entity_position }
   log(`[AUTORIO] Started mining at position: ${serpent.line(entity_position)}`)
 }
+
+script.on_event(defines.events.on_selected_entity_changed, (event: OnSelectedEntityChangedEvent) => {
+  if (player_state.task_state === TaskStates.MINING) {
+    // FIXME: who are changing the selected entity while mining?
+    // This only happens in multiplayer, why?
+
+    const player = game.connected_players[event.player_index - 1]
+    if (!player) {
+      return
+    }
+
+    log(`[AUTORIO] Selected entity changed while mining, now selected: ${player.selected?.name}`)
+  }
+})
 
 script.on_event(defines.events.on_script_path_request_finished, (event: OnScriptPathRequestFinishedEvent) => {
   if (player_state.task_state !== TaskStates.WALKING_TO_ENTITY) {
@@ -360,7 +377,7 @@ script.on_event(defines.events.on_script_path_request_finished, (event: OnScript
 script.on_event(defines.events.on_player_mined_entity, (unused_event: OnPlayerMinedEntityEvent) => {
   log('[AUTORIO] Entity mined, resetting to IDLE state')
   player_state.task_state = TaskStates.IDLE
-  player_state.parameters_walk_to_entity = undefined
+  player_state.parameters_mine_entity = undefined
 })
 
 function setup() {
@@ -526,6 +543,16 @@ function state_mining(player: LuaPlayer) {
     return
   }
 
+  if (player.mining_state.mining) {
+    log('[AUTORIO] Already mining, skipping')
+    return
+  }
+
+  if (player_state.parameters_mine_entity.position) {
+    start_mining(player, player_state.parameters_mine_entity.position)
+    return
+  }
+
   const nearest_entity = player.surface.find_entities_filtered({
     position: player.position,
     radius: 2,
@@ -533,7 +560,6 @@ function state_mining(player: LuaPlayer) {
     limit: 1,
   })[0]
 
-  log(`[AUTORIO] Mining entity: ${player_state.parameters_mine_entity.entity_name}`)
   if (nearest_entity !== undefined) {
     start_mining(player, nearest_entity.position)
   }
