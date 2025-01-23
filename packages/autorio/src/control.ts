@@ -12,14 +12,13 @@ import type {
   SurfaceCreateEntity,
 } from 'factorio:runtime'
 
-import type { PlayerState } from './types'
+import { new_task_manager } from './player_state'
 import { TaskStates } from './types'
+import { distance } from './utils/math'
 
 let setup_complete = false
 
-const player_state: PlayerState = {
-  task_state: TaskStates.IDLE,
-}
+const task_manager = new_task_manager()
 
 function log_player_info(player_id: number) {
   // compact for lua array index
@@ -127,94 +126,64 @@ function log_player_info(player_id: number) {
 
 remote.add_interface('autorio_tasks', {
   walk_to_entity: (entity_name: string, search_radius: number) => {
-    if (player_state.task_state !== TaskStates.IDLE) {
-      log(`[AUTORIO] Cannot start walk_to_entity task: Player is not idle`)
-      return false
-    }
-
     log(`[AUTORIO] New walk_to_entity task: ${entity_name}, radius: ${search_radius}`)
-
-    player_state.task_state = TaskStates.WALKING_TO_ENTITY
-    player_state.parameters_walk_to_entity = {
+    task_manager.add_task({
+      type: TaskStates.WALKING_TO_ENTITY,
       entity_name,
       search_radius,
       path: null,
       path_drawn: false,
       path_index: 1,
       calculating_path: false,
-      should_mine: false,
       target_position: null,
-    }
+    })
 
     return true
   },
 
   mine_entity: (entity_name: string) => {
-    if (player_state.task_state !== TaskStates.IDLE) {
-      log('[AUTORIO] Cannot start mine_entity task: Player is not idle')
-      return false
-    }
+    task_manager.add_task({
+      type: TaskStates.MINING,
+      entity_name,
+    })
 
     log(`[AUTORIO] New mine_entity task: ${entity_name}`)
-    player_state.task_state = TaskStates.MINING
-    player_state.parameters_mine_entity = {
-      entity_name,
-    }
-
     return true
   },
   place_entity: (entity_name: string) => {
-    if (player_state.task_state !== TaskStates.IDLE) {
-      log('[AUTORIO] Cannot start place_entity task: Player is not idle')
-      return false
-    }
-
-    player_state.task_state = TaskStates.PLACING
-    player_state.parameters_place_entity = {
+    task_manager.add_task({
+      type: TaskStates.PLACING,
       entity_name,
       position: undefined,
-    }
+    })
 
     log(`[AUTORIO] New place_entity task: ${entity_name}`)
     return true
   },
   auto_insert_nearby: (item_name: string, entity_name: string, max_count: number): [boolean, string] => {
-    if (player_state.task_state !== TaskStates.IDLE) {
-      log('[AUTORIO] Cannot start auto_insert_nearby task: Player is not idle')
-      return [false, 'Task already in progress']
-    }
-
-    player_state.task_state = TaskStates.AUTO_INSERTING
-    player_state.parameters_auto_insert_nearby = {
+    task_manager.add_task({
+      type: TaskStates.AUTO_INSERTING,
       item_name,
       entity_name,
       max_count: max_count || math.huge,
-    }
+    })
 
     log(`[AUTORIO] New auto_insert_nearby task for ${item_name} into ${entity_name}`)
     return [true, 'Task started']
   },
   pick_up_item: (item_name: string, container_name: string, count: number): [boolean, string] => {
-    if (player_state.task_state !== TaskStates.IDLE) {
-      log('[AUTORIO] Cannot start pick_up_item task: Player is not idle')
-      return [false, 'Task already in progress']
-    }
-
-    player_state.task_state = TaskStates.PICKING_UP
-    player_state.parameters_pickup_item = {
+    task_manager.add_task({
+      type: TaskStates.PICKING_UP,
       item_name,
       count: count || 1,
       container_name,
       search_radius: 8,
-    }
+    })
+
     log(`[AUTORIO] New pick_up_item task: ${item_name} x${count} from ${container_name}`)
     return [true, 'Task started']
   },
   craft_item: (item_name: string, count: number = 1): [boolean, string] => {
-    if (player_state.task_state !== TaskStates.IDLE) {
-      log('[AUTORIO] Cannot start craft_item task: Player is not idle')
-      return [false, 'Task already in progress']
-    }
     const player = game.connected_players[0]
     if (!player.force.recipes[item_name]) {
       log('[AUTORIO] Cannot start craft_item task: Recipe not available')
@@ -229,40 +198,27 @@ remote.add_interface('autorio_tasks', {
       return [false, 'Not enough ingredients']
     }
 
-    player_state.task_state = TaskStates.CRAFTING
-    player_state.parameters_craft_item = {
+    task_manager.add_task({
+      type: TaskStates.CRAFTING,
       item_name,
       count,
       crafted: 0,
-    }
-
-    player.begin_crafting({
-      recipe: item_name,
-      count,
     })
 
     log(`[AUTORIO] New craft_item task: ${item_name} x${count}`)
     return [true, 'Task started']
   },
   attack_nearest_enemy: (search_radius: number = 50): [boolean, string] => {
-    if (player_state.task_state !== TaskStates.IDLE) {
-      log('[AUTORIO] Cannot start attack_nearest_enemy task: Player is not idle')
-      return [false, 'Task already in progress']
-    }
-
-    player_state.task_state = TaskStates.ATTACKING
-    player_state.parameters_attack_nearest_enemy = {
+    task_manager.add_task({
+      type: TaskStates.ATTACKING,
       search_radius,
       target: null,
-    }
+    })
+
     log(`[AUTORIO] New attack nearest enemy task, search radius: ${search_radius}`)
     return [true, 'Task started']
   },
   research_technology: (technology_name: string): [boolean, string] => {
-    if (player_state.task_state !== TaskStates.IDLE) {
-      log('[AUTORIO] Cannot start research_technology task: Player is not idle')
-      return [false, 'Task already in progress']
-    }
     const player = game.connected_players[0]
     const force = player.force
     const tech = force.technologies[technology_name]
@@ -324,16 +280,35 @@ function get_direction(start_position: MapPositionStruct, end_position: MapPosit
   return defines.direction.southeast
 }
 
+function get_nearest_entity(player: LuaPlayer, entities: LuaEntity[]) {
+  let min_distance = math.huge
+  let nearest_entity: LuaEntity | null = null
+
+  if (entities.length === 0) {
+    return null
+  }
+
+  for (const entity of entities) {
+    const distance = (entity.position.x - player.position.x) ** 2 + (entity.position.y - player.position.y) ** 2
+    if (distance < min_distance) {
+      min_distance = distance
+      nearest_entity = entity
+    }
+  }
+
+  return nearest_entity
+}
+
 function start_mining(player: LuaPlayer, entity_position: MapPositionStruct) {
   log(`[AUTORIO] current mining state: ${serpent.line(player.mining_state)}`)
 
   player.update_selected_entity(entity_position)
-  player.mining_state = { mining: true, position: entity_position }
+  player.mining_state = { mining: true, position: entity_position } // should not use player.mine_entity() because it will skip the mining animation
   log(`[AUTORIO] Started mining at position: ${serpent.line(entity_position)}`)
 }
 
 script.on_event(defines.events.on_selected_entity_changed, (event: OnSelectedEntityChangedEvent) => {
-  if (player_state.task_state === TaskStates.MINING) {
+  if (task_manager.player_state.task_state === TaskStates.MINING) {
     // FIXME: who are changing the selected entity while mining?
     // This only happens in multiplayer, why?
 
@@ -347,37 +322,38 @@ script.on_event(defines.events.on_selected_entity_changed, (event: OnSelectedEnt
 })
 
 script.on_event(defines.events.on_script_path_request_finished, (event: OnScriptPathRequestFinishedEvent) => {
-  if (player_state.task_state !== TaskStates.WALKING_TO_ENTITY) {
+  if (task_manager.player_state.task_state !== TaskStates.WALKING_TO_ENTITY) {
     log('[AUTORIO] Not walking to entity, ignoring path request')
     return
   }
 
-  if (!player_state.parameters_walk_to_entity) {
+  if (!task_manager.player_state.parameters_walk_to_entity) {
     log('[AUTORIO] No parameters found when receiving path request')
     return
   }
 
   if (!event.path) {
     log('[AUTORIO] Path calculation failed, switching to direct walking')
-    player_state.task_state = TaskStates.WALKING_DIRECT
-    player_state.parameters_walking_direct = {
-      target_position: player_state.parameters_walk_to_entity.target_position,
+    task_manager.player_state.task_state = TaskStates.WALKING_DIRECT
+    task_manager.player_state.parameters_walking_direct = {
+      type: TaskStates.WALKING_DIRECT,
+      target_position: task_manager.player_state.parameters_walk_to_entity.target_position,
     }
-    player_state.parameters_walk_to_entity = undefined
+    task_manager.player_state.parameters_walk_to_entity = undefined
     return
   }
 
-  player_state.parameters_walk_to_entity.path = event.path
-  player_state.parameters_walk_to_entity.path_drawn = false
-  player_state.parameters_walk_to_entity.path_index = 1
-  player_state.parameters_walk_to_entity.calculating_path = false
+  task_manager.player_state.parameters_walk_to_entity.path = event.path
+  task_manager.player_state.parameters_walk_to_entity.path_drawn = false
+  task_manager.player_state.parameters_walk_to_entity.path_index = 1
+  task_manager.player_state.parameters_walk_to_entity.calculating_path = false
   log(`[AUTORIO] Path calculation completed. Path length: ${event.path}`)
 })
 
 script.on_event(defines.events.on_player_mined_entity, (unused_event: OnPlayerMinedEntityEvent) => {
-  log('[AUTORIO] Entity mined, resetting to IDLE state')
-  player_state.task_state = TaskStates.IDLE
-  player_state.parameters_mine_entity = undefined
+  log('[AUTORIO] Entity mined, next task')
+  task_manager.reset_task_state()
+  task_manager.next_task()
 })
 
 function setup() {
@@ -393,39 +369,30 @@ function setup() {
 }
 
 function state_walking_to_entity(player: LuaPlayer) {
-  if (!player_state.parameters_walk_to_entity) {
+  if (!task_manager.player_state.parameters_walk_to_entity) {
     log('[AUTORIO] No parameters found when walking to entity')
     return
   }
 
-  let nearest_entity: LuaEntity | null = null
-  let min_distance = math.huge
-
   const entities = player.surface.find_entities_filtered({
     position: player.position,
-    radius: player_state.parameters_walk_to_entity.search_radius,
-    name: player_state.parameters_walk_to_entity.entity_name, // TODO: catch entity name not found error
+    radius: task_manager.player_state.parameters_walk_to_entity.search_radius,
+    name: task_manager.player_state.parameters_walk_to_entity.entity_name, // TODO: catch entity name not found error
   })
   if (entities.length === 0) {
     log('[AUTORIO] No entities found, reverting to IDLE state')
-    player_state.task_state = TaskStates.IDLE
-    player_state.parameters_walk_to_entity = undefined
+    task_manager.reset_task_state()
+    task_manager.next_task()
     return
   }
 
-  for (const entity of entities) {
-    const distance = (entity.position.x - player.position.x) ** 2 + (entity.position.y - player.position.y) ** 2
-    if (distance < min_distance) {
-      min_distance = distance
-      nearest_entity = entity
-    }
-  }
+  const nearest_entity = get_nearest_entity(player, entities)
 
   log(`[AUTORIO] Nearest entity position: ${serpent.line(nearest_entity?.position)}`)
   log(`[AUTORIO] Player position: ${serpent.line(player.position)}`)
   log(`[AUTORIO] Player bounding box: ${serpent.line(player.character?.bounding_box)}`)
 
-  if (nearest_entity && !player_state.parameters_walk_to_entity.calculating_path && !player_state.parameters_walk_to_entity.path) {
+  if (nearest_entity && !task_manager.player_state.parameters_walk_to_entity.calculating_path && !task_manager.player_state.parameters_walk_to_entity.path) {
     const character = player.character
     if (!character) {
       log('[AUTORIO] Player character not found, aborting pathfinding')
@@ -476,32 +443,32 @@ function state_walking_to_entity(player: LuaPlayer) {
         allow_paths_through_own_entities: false,
       },
     })
-    player_state.parameters_walk_to_entity.calculating_path = true
-    player_state.parameters_walk_to_entity.target_position = nearest_entity.position
+    task_manager.player_state.parameters_walk_to_entity.calculating_path = true
+    task_manager.player_state.parameters_walk_to_entity.target_position = nearest_entity.position
     log(`[AUTORIO] Requested path calculation to ${serpent.line(nearest_entity.position)}`)
   }
 
-  if (player_state.parameters_walk_to_entity.path && nearest_entity) {
-    if (!player_state.parameters_walk_to_entity.path_drawn) {
-      for (let i = 0; i < player_state.parameters_walk_to_entity.path.length - 1; i++) {
+  if (task_manager.player_state.parameters_walk_to_entity.path && nearest_entity) {
+    if (!task_manager.player_state.parameters_walk_to_entity.path_drawn) {
+      for (let i = 0; i < task_manager.player_state.parameters_walk_to_entity.path.length - 1; i++) {
         rendering.draw_line({
           color: { r: 0, g: 1, b: 0 },
           width: 2,
-          from: player_state.parameters_walk_to_entity.path[i].position,
-          to: player_state.parameters_walk_to_entity.path[i + 1].position,
+          from: task_manager.player_state.parameters_walk_to_entity.path[i].position,
+          to: task_manager.player_state.parameters_walk_to_entity.path[i + 1].position,
           surface: player.surface,
           time_to_live: 600,
           draw_on_ground: true,
         })
       }
-      player_state.parameters_walk_to_entity.path_drawn = true
+      task_manager.player_state.parameters_walk_to_entity.path_drawn = true
       log('[AUTORIO] Path drawn on ground')
     }
 
-    const path = player_state.parameters_walk_to_entity.path
-    const path_index = player_state.parameters_walk_to_entity.path_index
+    const path = task_manager.player_state.parameters_walk_to_entity.path
+    const path_index = task_manager.player_state.parameters_walk_to_entity.path_index
 
-    if (path_index < path.length && math.sqrt((nearest_entity.position.x - player.position.x) ** 2 + (nearest_entity.position.y - player.position.y) ** 2) > 1) {
+    if (path_index < path.length && distance(nearest_entity.position, player.position) > 1) {
       const next_position = path[path_index].position
       const direction = get_direction(player.position, next_position)
 
@@ -511,52 +478,50 @@ function state_walking_to_entity(player: LuaPlayer) {
       }
 
       if (((next_position.x - player.position.x) ** 2 + (next_position.y - player.position.y) ** 2) < 0.01) {
-        player_state.parameters_walk_to_entity.path_index = path_index + 1
-        log(`[AUTORIO] Moving to next path index: ${player_state.parameters_walk_to_entity.path_index}`)
+        task_manager.player_state.parameters_walk_to_entity.path_index = path_index + 1
+        log(`[AUTORIO] Moving to next path index: ${task_manager.player_state.parameters_walk_to_entity.path_index}`)
       }
-      if (((nearest_entity.position.x - player.position.x) ** 2 + (nearest_entity.position.y - player.position.y) ** 2) < 2) {
-        player_state.task_state = TaskStates.IDLE
-        player_state.parameters_walk_to_entity = undefined
+      // no need to square root
+      if (((nearest_entity.position.x - player.position.x) ** 2 + (nearest_entity.position.y - player.position.y) ** 2) < 0.01) {
         log('[AUTORIO] Reached target entity, switching to IDLE state')
+
+        // fix final position, avoid walked to the target but cannot interact with it
+        player.teleport(nearest_entity.position)
+
+        task_manager.reset_task_state()
+        task_manager.next_task()
       }
     }
     else {
       rendering.clear()
-      player.walking_state = { walking: false, direction: defines.direction.north }
+      player.walking_state = { walking: false, direction: player.walking_state.direction }
 
-      if (player_state.parameters_walk_to_entity.should_mine) {
-        log('[AUTORIO] Switching to MINING state')
-        player_state.task_state = TaskStates.MINING
-      }
-      else {
-        log('[AUTORIO] Task completed, switching to IDLE state')
-        player_state.task_state = TaskStates.IDLE
-        player_state.parameters_walk_to_entity = undefined
-      }
+      log('[AUTORIO] Task completed, switching to IDLE state')
+      task_manager.reset_task_state()
+      task_manager.next_task()
     }
   }
 }
 
 function state_mining(player: LuaPlayer) {
-  if (!player_state.parameters_mine_entity) {
+  if (!task_manager.player_state.parameters_mine_entity) {
     log('[AUTORIO] No parameters found when mining')
     return
   }
 
   if (player.mining_state.mining) {
-    log('[AUTORIO] Already mining, skipping')
     return
   }
 
-  if (player_state.parameters_mine_entity.position) {
-    start_mining(player, player_state.parameters_mine_entity.position)
+  if (task_manager.player_state.parameters_mine_entity.position) {
+    start_mining(player, task_manager.player_state.parameters_mine_entity.position)
     return
   }
 
   const nearest_entity = player.surface.find_entities_filtered({
     position: player.position,
-    radius: 2,
-    name: player_state.parameters_mine_entity.entity_name,
+    radius: 2, // player can only mine entities within 2 tiles
+    name: task_manager.player_state.parameters_mine_entity.entity_name,
     limit: 1,
   })[0]
 
@@ -565,20 +530,20 @@ function state_mining(player: LuaPlayer) {
   }
   else {
     log('[AUTORIO] No entity found to mine, switching to IDLE state')
-    player_state.task_state = TaskStates.IDLE
-    player_state.parameters_mine_entity = undefined
+    task_manager.reset_task_state()
+    task_manager.next_task()
   }
 }
 
 function state_placing(player: LuaPlayer) {
   if (!player) {
     log('[AUTORIO] Invalid player, ending PLACING task')
-    player_state.task_state = TaskStates.IDLE
-    player_state.parameters_place_entity = undefined
+    task_manager.reset_task_state()
+    task_manager.next_task()
     return [false, 'Invalid player']
   }
 
-  if (!player_state.parameters_place_entity) {
+  if (!task_manager.player_state.parameters_place_entity) {
     log('[AUTORIO] No parameters found when placing')
     return
   }
@@ -588,49 +553,49 @@ function state_placing(player: LuaPlayer) {
 
   if (!inventory) {
     log('[AUTORIO] Cannot access player inventory, ending PLACING task')
-    player_state.task_state = TaskStates.IDLE
-    player_state.parameters_place_entity = undefined
+    task_manager.reset_task_state()
+    task_manager.next_task()
     return [false, 'Cannot access player inventory']
   }
 
-  const entity_prototype = prototypes.entity[player_state.parameters_place_entity.entity_name]
+  const entity_prototype = prototypes.entity[task_manager.player_state.parameters_place_entity.entity_name]
   if (!entity_prototype || !entity_prototype.items_to_place_this) {
     log('[AUTORIO] Invalid entity name, ending PLACING task')
-    player_state.task_state = TaskStates.IDLE
-    player_state.parameters_place_entity = undefined
+    task_manager.reset_task_state()
+    task_manager.next_task()
     return [false, 'Invalid entity name']
   }
 
   const item_name = entity_prototype.items_to_place_this[0]
   if (!item_name) {
     log('[AUTORIO] Invalid entity name, ending PLACING task')
-    player_state.task_state = TaskStates.IDLE
-    player_state.parameters_place_entity = undefined
+    task_manager.reset_task_state()
+    task_manager.next_task()
     return [false, 'Invalid entity name']
   }
 
-  const [item_stack, unused_count] = inventory.find_item_stack(player_state.parameters_place_entity.entity_name)
+  const [item_stack, unused_count] = inventory.find_item_stack(task_manager.player_state.parameters_place_entity.entity_name)
   if (!item_stack) {
     log('[AUTORIO] Entity not found in inventory, ending PLACING task')
-    player_state.task_state = TaskStates.IDLE
-    player_state.parameters_place_entity = undefined
+    task_manager.reset_task_state()
+    task_manager.next_task()
     return [false, 'Entity not found in inventory']
   }
 
-  if (!player_state.parameters_place_entity.position) {
-    player_state.parameters_place_entity.position = surface.find_non_colliding_position(player_state.parameters_place_entity.entity_name, player.position, 1, 1)
-    if (!player_state.parameters_place_entity.position) {
+  if (!task_manager.player_state.parameters_place_entity.position) {
+    task_manager.player_state.parameters_place_entity.position = surface.find_non_colliding_position(task_manager.player_state.parameters_place_entity.entity_name, player.position, 1, 1)
+    if (!task_manager.player_state.parameters_place_entity.position) {
       log('[AUTORIO] Could not find a valid position to place the entity, ending PLACING task')
-      player_state.task_state = TaskStates.IDLE
-      player_state.parameters_place_entity = undefined
+      task_manager.reset_task_state()
+      task_manager.next_task()
       return [false, 'Could not find a valid position to place the entity']
     }
   }
 
-  player_state.task_state = TaskStates.IDLE
+  task_manager.player_state.task_state = TaskStates.IDLE
   const create_entity_args: SurfaceCreateEntity = {
-    name: player_state.parameters_place_entity.entity_name,
-    position: player_state.parameters_place_entity.position,
+    name: task_manager.player_state.parameters_place_entity.entity_name,
+    position: task_manager.player_state.parameters_place_entity.position,
     force: player.force,
     raise_built: true,
     player,
@@ -639,31 +604,31 @@ function state_placing(player: LuaPlayer) {
 
   if (entity) {
     item_stack.count = item_stack.count - 1
-    log(`[AUTORIO] Entity placed successfully: ${player_state.parameters_place_entity.entity_name}`)
+    log(`[AUTORIO] Entity placed successfully: ${task_manager.player_state.parameters_place_entity.entity_name}`)
     return [true, 'Entity placed successfully', entity]
   }
-  log(`[AUTORIO] Failed to place entity: ${player_state.parameters_place_entity.entity_name}`)
+  log(`[AUTORIO] Failed to place entity: ${task_manager.player_state.parameters_place_entity.entity_name}`)
   return [false, 'Failed to place entity']
 }
 
 function state_picking_up(player: LuaPlayer) {
-  if (!player_state.parameters_pickup_item) {
+  if (!task_manager.player_state.parameters_pickup_item) {
     log('[AUTORIO] No parameters found when picking up')
     return
   }
 
   const nearby_containers = player.surface.find_entities_filtered({
     position: player.position,
-    radius: player_state.parameters_pickup_item.search_radius,
-    name: player_state.parameters_pickup_item.container_name,
+    radius: task_manager.player_state.parameters_pickup_item.search_radius,
+    name: task_manager.player_state.parameters_pickup_item.container_name,
     force: player.force,
   })
 
   const player_inventory = player.get_main_inventory()
   if (!player_inventory) {
     log('[AUTORIO] Cannot access player inventory, ending PICKING_UP task')
-    player_state.task_state = TaskStates.IDLE
-    player_state.parameters_pickup_item = undefined
+    task_manager.reset_task_state()
+    task_manager.next_task()
     return
   }
 
@@ -674,27 +639,27 @@ function state_picking_up(player: LuaPlayer) {
     for (let i = 1; i <= max_index; i++) {
       const inventory = container.get_inventory(i)
       if (inventory) { // Check if inventory exists at this index
-        const [item_stack, unused_count] = inventory.find_item_stack(player_state.parameters_pickup_item.item_name)
+        const [item_stack, unused_count] = inventory.find_item_stack(task_manager.player_state.parameters_pickup_item.item_name)
         if (item_stack) {
-          const to_pick_up = math.min(item_stack.count, player_state.parameters_pickup_item.count - picked_up_total)
-          const picked_up = player_inventory.insert({ name: player_state.parameters_pickup_item.item_name, count: to_pick_up })
+          const to_pick_up = math.min(item_stack.count, task_manager.player_state.parameters_pickup_item.count - picked_up_total)
+          const picked_up = player_inventory.insert({ name: task_manager.player_state.parameters_pickup_item.item_name, count: to_pick_up })
 
           if (picked_up > 0) {
-            inventory.remove({ name: player_state.parameters_pickup_item.item_name, count: picked_up })
+            inventory.remove({ name: task_manager.player_state.parameters_pickup_item.item_name, count: picked_up })
             picked_up_total = picked_up_total + picked_up
-            log(`[AUTORIO] Picked up ${picked_up} ${player_state.parameters_pickup_item.item_name} from ${container.name} inventory index ${i}`)
+            log(`[AUTORIO] Picked up ${picked_up} ${task_manager.player_state.parameters_pickup_item.item_name} from ${container.name} inventory index ${i}`)
           }
 
-          if (picked_up_total >= player_state.parameters_pickup_item.count) {
+          if (picked_up_total >= task_manager.player_state.parameters_pickup_item.count) {
             break
           }
         }
       }
-      if (picked_up_total >= player_state.parameters_pickup_item.count) {
+      if (picked_up_total >= task_manager.player_state.parameters_pickup_item.count) {
         break
       }
     }
-    if (picked_up_total >= player_state.parameters_pickup_item.count) {
+    if (picked_up_total >= task_manager.player_state.parameters_pickup_item.count) {
       break
     }
   }
@@ -703,15 +668,15 @@ function state_picking_up(player: LuaPlayer) {
     log('[AUTORIO] No items picked up, ending task')
   }
   else {
-    log(`[AUTORIO] Picked up a total of ${picked_up_total} ${player_state.parameters_pickup_item.item_name}`)
+    log(`[AUTORIO] Picked up a total of ${picked_up_total} ${task_manager.player_state.parameters_pickup_item.item_name}`)
   }
 
-  player_state.task_state = TaskStates.IDLE
-  player_state.parameters_pickup_item = undefined
+  task_manager.reset_task_state()
+  task_manager.next_task()
 }
 
 function state_auto_inserting(player: LuaPlayer) {
-  if (!player_state.parameters_auto_insert_nearby) {
+  if (!task_manager.player_state.parameters_auto_insert_nearby) {
     log('[AUTORIO] No parameters found when auto inserting')
     return
   }
@@ -719,44 +684,44 @@ function state_auto_inserting(player: LuaPlayer) {
   const nearby_entities = player.surface.find_entities_filtered({
     position: player.position,
     radius: 8,
-    name: player_state.parameters_auto_insert_nearby.entity_name,
+    name: task_manager.player_state.parameters_auto_insert_nearby.entity_name,
     force: player.force,
   })
 
   const player_inventory = player.get_main_inventory()
   if (!player_inventory) {
     log('[AUTORIO] Cannot access player inventory, ending AUTO_INSERTING task')
-    player_state.task_state = TaskStates.IDLE
-    player_state.parameters_auto_insert_nearby = undefined
+    task_manager.reset_task_state()
+    task_manager.next_task()
     return
   }
 
-  const [item_stack, unused_count] = player_inventory.find_item_stack(player_state.parameters_auto_insert_nearby.item_name)
+  const [item_stack, unused_count] = player_inventory.find_item_stack(task_manager.player_state.parameters_auto_insert_nearby.item_name)
   let inserted_total = 0
 
   if (item_stack) {
     for (const entity of nearby_entities) {
       const max_index = entity.get_max_inventory_index()
-      if (entity.can_insert({ name: player_state.parameters_auto_insert_nearby.item_name })) {
+      if (entity.can_insert({ name: task_manager.player_state.parameters_auto_insert_nearby.item_name })) {
         for (let i = 1; i <= max_index; i++) {
           const inventory = entity.get_inventory(i)
-          if (inventory && inventory.can_insert({ name: player_state.parameters_auto_insert_nearby.item_name })) {
-            const to_insert = math.min(item_stack.count, player_state.parameters_auto_insert_nearby.max_count - inserted_total)
-            const inserted = inventory.insert({ name: player_state.parameters_auto_insert_nearby.item_name, count: to_insert })
+          if (inventory && inventory.can_insert({ name: task_manager.player_state.parameters_auto_insert_nearby.item_name })) {
+            const to_insert = math.min(item_stack.count, task_manager.player_state.parameters_auto_insert_nearby.max_count - inserted_total)
+            const inserted = inventory.insert({ name: task_manager.player_state.parameters_auto_insert_nearby.item_name, count: to_insert })
             if (inserted > 0) {
-              player_inventory.remove({ name: player_state.parameters_auto_insert_nearby.item_name, count: inserted })
+              player_inventory.remove({ name: task_manager.player_state.parameters_auto_insert_nearby.item_name, count: inserted })
               inserted_total = inserted_total + inserted
-              log(`[AUTORIO] Inserted ${inserted} ${player_state.parameters_auto_insert_nearby.item_name} into ${entity.name} inventory index ${i}`)
+              log(`[AUTORIO] Inserted ${inserted} ${task_manager.player_state.parameters_auto_insert_nearby.item_name} into ${entity.name} inventory index ${i}`)
             }
-            if (inserted_total >= player_state.parameters_auto_insert_nearby.max_count) {
+            if (inserted_total >= task_manager.player_state.parameters_auto_insert_nearby.max_count) {
               break
             }
           }
-          if (inserted_total >= player_state.parameters_auto_insert_nearby.max_count) {
+          if (inserted_total >= task_manager.player_state.parameters_auto_insert_nearby.max_count) {
             break
           }
         }
-        if (inserted_total >= player_state.parameters_auto_insert_nearby.max_count) {
+        if (inserted_total >= task_manager.player_state.parameters_auto_insert_nearby.max_count) {
           break
         }
       }
@@ -766,11 +731,11 @@ function state_auto_inserting(player: LuaPlayer) {
       log('[AUTORIO] No items inserted, ending task')
     }
     else {
-      log(`[AUTORIO] Inserted a total of ${inserted_total} ${player_state.parameters_auto_insert_nearby.item_name}`)
+      log(`[AUTORIO] Inserted a total of ${inserted_total} ${task_manager.player_state.parameters_auto_insert_nearby.item_name}`)
     }
 
-    player_state.task_state = TaskStates.IDLE
-    player_state.parameters_auto_insert_nearby = undefined
+    task_manager.reset_task_state()
+    task_manager.next_task()
   }
 }
 
@@ -810,33 +775,33 @@ function check_can_craft(player: LuaPlayer, item_name: string, count: number) {
 }
 
 function state_researching(player: LuaPlayer) {
-  if (!player_state.parameters_research_technology) {
+  if (!task_manager.player_state.parameters_research_technology) {
     log('[AUTORIO] No parameters found when researching')
     return
   }
 
   const force = player.force
-  const tech = force.technologies[player_state.parameters_research_technology.technology_name]
+  const tech = force.technologies[task_manager.player_state.parameters_research_technology.technology_name]
 
   if (tech.researched) {
-    log(`[AUTORIO] Research completed: ${player_state.parameters_research_technology.technology_name}`)
-    player_state.task_state = TaskStates.IDLE
-    player_state.parameters_research_technology = undefined
+    log(`[AUTORIO] Research completed: ${task_manager.player_state.parameters_research_technology.technology_name}`)
+    task_manager.reset_task_state()
+    task_manager.next_task()
   }
   else if (force.current_research !== tech) {
-    log(`[AUTORIO] Research interrupted: ${player_state.parameters_research_technology.technology_name}`)
-    player_state.task_state = TaskStates.IDLE
-    player_state.parameters_research_technology = undefined
+    log(`[AUTORIO] Research interrupted: ${task_manager.player_state.parameters_research_technology.technology_name}`)
+    task_manager.reset_task_state()
+    task_manager.next_task()
   }
 }
 
 function state_walking_direct(player: LuaPlayer) {
-  if (!player_state.parameters_walking_direct) {
+  if (!task_manager.player_state.parameters_walking_direct) {
     log('[AUTORIO] No parameters found when walking directly')
     return
   }
 
-  const target = player_state.parameters_walking_direct.target_position
+  const target = task_manager.player_state.parameters_walking_direct.target_position
 
   if (target) {
     const direction = get_direction(player.position, target)
@@ -847,14 +812,14 @@ function state_walking_direct(player: LuaPlayer) {
 
     if (((target.x - player.position.x) ** 2 + (target.y - player.position.y) ** 2) < 2) {
       log('[AUTORIO] Reached target, switching to IDLE state')
-      player_state.task_state = TaskStates.IDLE
-      player_state.parameters_walking_direct = undefined
+      task_manager.reset_task_state()
+      task_manager.next_task()
     }
   }
   else {
     log('[AUTORIO] No target position, switching to IDLE state')
-    player_state.task_state = TaskStates.IDLE
-    player_state.parameters_walking_direct = undefined
+    task_manager.reset_task_state()
+    task_manager.next_task()
   }
 }
 
@@ -874,29 +839,29 @@ script.on_event(defines.events.on_tick, (unused_event) => {
     return
   }
 
-  if (player_state.task_state === TaskStates.IDLE) {
+  if (task_manager.player_state.task_state === TaskStates.IDLE) {
     return
   }
 
-  if (player_state.task_state === TaskStates.WALKING_TO_ENTITY) {
+  if (task_manager.player_state.task_state === TaskStates.WALKING_TO_ENTITY) {
     state_walking_to_entity(player)
   }
-  else if (player_state.task_state === TaskStates.MINING) {
+  else if (task_manager.player_state.task_state === TaskStates.MINING) {
     state_mining(player)
   }
-  else if (player_state.task_state === TaskStates.PLACING) {
+  else if (task_manager.player_state.task_state === TaskStates.PLACING) {
     state_placing(player)
   }
-  else if (player_state.task_state === TaskStates.AUTO_INSERTING) {
+  else if (task_manager.player_state.task_state === TaskStates.AUTO_INSERTING) {
     state_auto_inserting(player)
   }
-  else if (player_state.task_state === TaskStates.PICKING_UP) {
+  else if (task_manager.player_state.task_state === TaskStates.PICKING_UP) {
     state_picking_up(player)
   }
-  else if (player_state.task_state === TaskStates.RESEARCHING) {
+  else if (task_manager.player_state.task_state === TaskStates.RESEARCHING) {
     state_researching(player)
   }
-  else if (player_state.task_state === TaskStates.WALKING_DIRECT) {
+  else if (task_manager.player_state.task_state === TaskStates.WALKING_DIRECT) {
     state_walking_direct(player)
   }
 })
@@ -905,21 +870,21 @@ script.on_event(defines.events.on_player_crafted_item, (event: OnPlayerCraftedIt
   // compact for lua array index
   log(`[AUTORIO] Player ${game.connected_players[event.player_index - 1].name} crafted item: ${event.item_stack.name}`) // TODO: determine player index
 
-  if (!player_state.parameters_craft_item) {
+  if (!task_manager.player_state.parameters_craft_item) {
     log('[AUTORIO] No parameters found when item crafted')
     return
   }
 
-  if (player_state.task_state !== TaskStates.CRAFTING) {
+  if (task_manager.player_state.task_state !== TaskStates.CRAFTING) {
     return
   }
 
-  player_state.parameters_craft_item.crafted = player_state.parameters_craft_item.crafted + 1
-  log(`[AUTORIO] Crafted 1 ${player_state.parameters_craft_item.item_name}, remaining: ${player_state.parameters_craft_item.count - player_state.parameters_craft_item.crafted}`)
+  task_manager.player_state.parameters_craft_item.crafted = task_manager.player_state.parameters_craft_item.crafted + 1
+  log(`[AUTORIO] Crafted 1 ${task_manager.player_state.parameters_craft_item.item_name}, remaining: ${task_manager.player_state.parameters_craft_item.count - task_manager.player_state.parameters_craft_item.crafted}`)
 
-  if (player_state.parameters_craft_item.crafted >= player_state.parameters_craft_item.count) {
+  if (task_manager.player_state.parameters_craft_item.crafted >= task_manager.player_state.parameters_craft_item.count) {
     log('[AUTORIO] Crafting task complete')
-    player_state.task_state = TaskStates.IDLE
-    player_state.parameters_craft_item = undefined
+    task_manager.reset_task_state()
+    task_manager.next_task()
   }
 })
