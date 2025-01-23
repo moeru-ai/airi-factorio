@@ -353,6 +353,11 @@ script.on_event(defines.events.on_script_path_request_finished, (event: OnScript
 script.on_event(defines.events.on_player_mined_entity, (unused_event: OnPlayerMinedEntityEvent) => {
   log('[AUTORIO] Entity mined, next task')
   task_manager.reset_task_state()
+
+  if (task_manager.is_task_queue_empty()) {
+    return
+  }
+
   task_manager.next_task()
 })
 
@@ -605,6 +610,8 @@ function state_placing(player: LuaPlayer) {
   if (entity) {
     item_stack.count = item_stack.count - 1
     log(`[AUTORIO] Entity placed successfully: ${task_manager.player_state.parameters_place_entity.entity_name}`)
+    task_manager.reset_task_state()
+    task_manager.next_task()
     return [true, 'Entity placed successfully', entity]
   }
   log(`[AUTORIO] Failed to place entity: ${task_manager.player_state.parameters_place_entity.entity_name}`)
