@@ -1,6 +1,6 @@
 import { Format, setGlobalFormat, useLogg } from '@guiiai/logg'
 import { execa } from 'execa'
-import { client, v2FactorioConsoleCommandMessagePost } from 'factorio-rcon-api-client'
+import { client, v2FactorioConsoleCommandMessagePost, v2FactorioConsoleCommandRawPost } from 'factorio-rcon-api-client'
 
 import { factorioConfig, initEnv, rconClientConfig } from './config'
 import { handleMessage } from './message-handler'
@@ -45,15 +45,21 @@ async function main() {
 
     const llmResponse = await handleMessage(chatMessage.message)
     if (!llmResponse) {
+      logger.error('Failed to handle message')
       continue
     }
 
-    v2FactorioConsoleCommandMessagePost({
+    await v2FactorioConsoleCommandMessagePost({
       body: {
-        message: llmResponse,
+        message: llmResponse.taskDescription,
       },
-    }).then((r: any) => {
-      logger.withFields(r).debug('RCON response')
+    })
+
+    const command = llmResponse.taskCommands.join(';')
+    await v2FactorioConsoleCommandRawPost({
+      body: {
+        input: `/c ${command}`,
+      },
     })
   }
 }

@@ -5,6 +5,15 @@ export interface ChatMessage {
   date: string
 }
 
+export interface LLMMessage {
+  taskDescription: string
+  taskCommands: string[]
+}
+
+export function parseLLMMessage(message: string): LLMMessage {
+  return JSON.parse(message) as LLMMessage
+}
+
 export function parseChatMessage(log: string): ChatMessage | null {
   // example: 2000-01-02 12:34:56 [CHAT] <server>: message
   const serverChatRegex = /(\d{4}-\d{2}-\d{2}) (\d{2}:\d{2}:\d{2}) \[CHAT\] <server>: (.+)/

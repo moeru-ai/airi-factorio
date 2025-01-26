@@ -23,7 +23,8 @@
     "@xsai/generate-text": "^0.0.29",
     "@xsai/providers": "^0.0.29",
     "execa": "^9.5.2",
-    "factorio-rcon-api-client": "^2.0.4"
+    "factorio-rcon-api-client": "^2.0.4",
+    "neuri": "^0.0.19"
   },
   "devDependencies": {
     "@types/node": "^22.10.7",

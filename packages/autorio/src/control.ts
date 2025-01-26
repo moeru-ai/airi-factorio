@@ -691,7 +691,9 @@ function state_picking_up(player: LuaPlayer) {
 }
 
 function state_auto_inserting(player: LuaPlayer) {
-  if (!task_manager.player_state.parameters_auto_insert_nearby) {
+  const parameters = task_manager.player_state.parameters_auto_insert_nearby
+
+  if (!parameters) {
     log('[AUTORIO] No parameters found when auto inserting')
     return
   }
@@ -699,7 +701,7 @@ function state_auto_inserting(player: LuaPlayer) {
   const nearby_entities = player.surface.find_entities_filtered({
     position: player.position,
     radius: 8,
-    name: task_manager.player_state.parameters_auto_insert_nearby.entity_name,
+    name: parameters.entity_name,
     force: player.force,
   })
 
@@ -711,47 +713,58 @@ function state_auto_inserting(player: LuaPlayer) {
     return
   }
 
-  const [item_stack, unused_count] = player_inventory.find_item_stack(task_manager.player_state.parameters_auto_insert_nearby.item_name)
+  const [item_stack, unused_count] = player_inventory.find_item_stack(parameters.item_name)
   let inserted_total = 0
 
-  if (item_stack) {
-    for (const entity of nearby_entities) {
-      const max_index = entity.get_max_inventory_index()
-      if (entity.can_insert({ name: task_manager.player_state.parameters_auto_insert_nearby.item_name })) {
-        for (let i = 1; i <= max_index; i++) {
-          const inventory = entity.get_inventory(i)
-          if (inventory && inventory.can_insert({ name: task_manager.player_state.parameters_auto_insert_nearby.item_name })) {
-            const to_insert = math.min(item_stack.count, task_manager.player_state.parameters_auto_insert_nearby.max_count - inserted_total)
-            const inserted = inventory.insert({ name: task_manager.player_state.parameters_auto_insert_nearby.item_name, count: to_insert })
-            if (inserted > 0) {
-              player_inventory.remove({ name: task_manager.player_state.parameters_auto_insert_nearby.item_name, count: inserted })
-              inserted_total = inserted_total + inserted
-              log(`[AUTORIO] Inserted ${inserted} ${task_manager.player_state.parameters_auto_insert_nearby.item_name} into ${entity.name} inventory index ${i}`)
-            }
-            if (inserted_total >= task_manager.player_state.parameters_auto_insert_nearby.max_count) {
-              break
-            }
-          }
-          if (inserted_total >= task_manager.player_state.parameters_auto_insert_nearby.max_count) {
-            break
-          }
+  if (!item_stack) {
+    return
+  }
+
+  for (const entity of nearby_entities) {
+    const max_index = entity.get_max_inventory_index()
+    if (!entity.can_insert({ name: parameters.item_name })) {
+      continue
+    }
+
+    for (let i = 1; i <= max_index; i++) {
+      const item_name = parameters.item_name
+      const inventory = entity.get_inventory(i)
+      if (inventory && inventory.can_insert({ name: item_name })) {
+        const to_insert = math.min(item_stack.count, parameters.max_count - inserted_total)
+        log(`[AUTORIO] Item stack: ${serpent.line(item_stack)}`)
+        if (to_insert <= 0) {
+          continue
         }
-        if (inserted_total >= task_manager.player_state.parameters_auto_insert_nearby.max_count) {
+
+        log(`[AUTORIO] Inserting ${to_insert} ${item_name} into ${entity.name} inventory index ${i}`)
+        const inserted = inventory.insert({ name: item_name, count: to_insert })
+        if (inserted > 0) {
+          player_inventory.remove({ name: item_name, count: inserted })
+          inserted_total = inserted_total + inserted
+          log(`[AUTORIO] Inserted ${inserted} ${item_name} into ${entity.name} inventory index ${i}`)
+        }
+        if (inserted_total >= parameters.max_count) {
           break
         }
       }
+      if (inserted_total >= parameters.max_count) {
+        break
+      }
     }
-
-    if (inserted_total === 0) {
-      log('[AUTORIO] No items inserted, ending task')
+    if (inserted_total >= parameters.max_count) {
+      break
     }
-    else {
-      log(`[AUTORIO] Inserted a total of ${inserted_total} ${task_manager.player_state.parameters_auto_insert_nearby.item_name}`)
-    }
-
-    task_manager.reset_task_state()
-    task_manager.next_task()
   }
+
+  if (inserted_total === 0) {
+    log('[AUTORIO] No items inserted, ending task')
+  }
+  else {
+    log(`[AUTORIO] Inserted a total of ${inserted_total} ${parameters.item_name}`)
+  }
+
+  task_manager.reset_task_state()
+  task_manager.next_task()
 }
 
 function check_can_craft(player: LuaPlayer, item_name: string, count: number) {
