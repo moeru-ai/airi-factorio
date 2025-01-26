@@ -9,10 +9,11 @@ import type {
   OnPlayerMinedEntityEvent,
   OnScriptPathRequestFinishedEvent,
   OnSelectedEntityChangedEvent,
+  PathfinderWaypoint,
   SurfaceCreateEntity,
 } from 'factorio:runtime'
 
-import { new_task_manager } from './player_state'
+import { new_task_manager } from './task_manager'
 import { TaskStates } from './types'
 import { distance } from './utils/math'
 
@@ -300,26 +301,14 @@ function get_nearest_entity(player: LuaPlayer, entities: LuaEntity[]) {
 }
 
 function start_mining(player: LuaPlayer, entity_position: MapPositionStruct) {
-  log(`[AUTORIO] current mining state: ${serpent.line(player.mining_state)}`)
-
   player.update_selected_entity(entity_position)
   player.mining_state = { mining: true, position: entity_position } // should not use player.mine_entity() because it will skip the mining animation
   log(`[AUTORIO] Started mining at position: ${serpent.line(entity_position)}`)
 }
 
-script.on_event(defines.events.on_selected_entity_changed, (event: OnSelectedEntityChangedEvent) => {
-  if (task_manager.player_state.task_state === TaskStates.MINING) {
-    // FIXME: who are changing the selected entity while mining?
-    // This only happens in multiplayer, why?
-
-    const player = game.connected_players[event.player_index - 1]
-    if (!player) {
-      return
-    }
-
-    log(`[AUTORIO] Selected entity changed while mining, now selected: ${player.selected?.name}`)
-  }
-})
+// FIXME: who are changing the selected entity while mining?
+// This only happens in multiplayer, why?
+script.on_event(defines.events.on_selected_entity_changed, (unused_event: OnSelectedEntityChangedEvent) => {})
 
 script.on_event(defines.events.on_script_path_request_finished, (event: OnScriptPathRequestFinishedEvent) => {
   if (task_manager.player_state.task_state !== TaskStates.WALKING_TO_ENTITY) {
@@ -351,6 +340,10 @@ script.on_event(defines.events.on_script_path_request_finished, (event: OnScript
 })
 
 script.on_event(defines.events.on_player_mined_entity, (unused_event: OnPlayerMinedEntityEvent) => {
+  if (task_manager.player_state.task_state !== TaskStates.MINING) {
+    return
+  }
+
   log('[AUTORIO] Entity mined, next task')
   task_manager.reset_task_state()
 
@@ -373,18 +366,80 @@ function setup() {
   log('[AUTORIO] Setup complete')
 }
 
+function draw_path(player: LuaPlayer, path: PathfinderWaypoint[]) {
+  for (let i = 0; i < path.length - 1; i++) {
+    rendering.draw_line({
+      color: { r: 0, g: 1, b: 0 },
+      width: 2,
+      from: path[i].position,
+      to: path[i + 1].position,
+      surface: player.surface,
+      time_to_live: 600,
+      draw_on_ground: true,
+    })
+  }
+}
+
+function follow_path(player: LuaPlayer, path: PathfinderWaypoint[]) {
+  if (path.length === 0) {
+    return true
+  }
+
+  // check if reached next waypoint
+  const next_position = path[0].position
+  const d = distance(next_position, player.position)
+  if (d < 0.1) {
+    path.shift()
+    return false
+  }
+
+  // move towards next waypoint
+  const direction = get_direction(player.position, next_position)
+  player.walking_state = {
+    walking: true,
+    direction,
+  }
+
+  return false
+}
+
 function state_walking_to_entity(player: LuaPlayer) {
   if (!task_manager.player_state.parameters_walk_to_entity) {
     log('[AUTORIO] No parameters found when walking to entity')
     return
   }
 
+  if (task_manager.player_state.parameters_walk_to_entity.calculating_path) {
+    log('[AUTORIO] Path calculation in progress, skipping')
+    return
+  }
+
+  // follow path
+  if (task_manager.player_state.parameters_walk_to_entity.path) {
+    if (!task_manager.player_state.parameters_walk_to_entity.path_drawn) {
+      draw_path(player, task_manager.player_state.parameters_walk_to_entity.path)
+      task_manager.player_state.parameters_walk_to_entity.path_drawn = true
+      log('[AUTORIO] Path drawn on ground')
+    }
+
+    if (follow_path(player, task_manager.player_state.parameters_walk_to_entity.path)) {
+      log('[AUTORIO] Task completed, switching to IDLE state')
+      rendering.clear()
+      task_manager.reset_task_state()
+      task_manager.next_task()
+    }
+
+    return
+  }
+
+  // find nearest entity and calculate path
   const entities = player.surface.find_entities_filtered({
     position: player.position,
     radius: task_manager.player_state.parameters_walk_to_entity.search_radius,
     name: task_manager.player_state.parameters_walk_to_entity.entity_name, // TODO: catch entity name not found error
   })
-  if (entities.length === 0) {
+
+  if (!entities.length) {
     log('[AUTORIO] No entities found, reverting to IDLE state')
     task_manager.reset_task_state()
     task_manager.next_task()
@@ -404,7 +459,7 @@ function state_walking_to_entity(player: LuaPlayer) {
       return
     }
 
-    // TODO: improve path following
+    // TODO: improve path following, check if stuck on objects
     // currently using larger than character bbox as a workaround for the path following getting stuck on objects
     // may sometimes still get stuck on trees and will fail to find small passages
     const bbox: BoundingBoxArray = [[-0.5, -0.5], [0.5, 0.5]]
@@ -452,60 +507,6 @@ function state_walking_to_entity(player: LuaPlayer) {
     task_manager.player_state.parameters_walk_to_entity.target_position = nearest_entity.position
     log(`[AUTORIO] Requested path calculation to ${serpent.line(nearest_entity.position)}`)
   }
-
-  if (task_manager.player_state.parameters_walk_to_entity.path && nearest_entity) {
-    if (!task_manager.player_state.parameters_walk_to_entity.path_drawn) {
-      for (let i = 0; i < task_manager.player_state.parameters_walk_to_entity.path.length - 1; i++) {
-        rendering.draw_line({
-          color: { r: 0, g: 1, b: 0 },
-          width: 2,
-          from: task_manager.player_state.parameters_walk_to_entity.path[i].position,
-          to: task_manager.player_state.parameters_walk_to_entity.path[i + 1].position,
-          surface: player.surface,
-          time_to_live: 600,
-          draw_on_ground: true,
-        })
-      }
-      task_manager.player_state.parameters_walk_to_entity.path_drawn = true
-      log('[AUTORIO] Path drawn on ground')
-    }
-
-    const path = task_manager.player_state.parameters_walk_to_entity.path
-    const path_index = task_manager.player_state.parameters_walk_to_entity.path_index
-
-    if (path_index < path.length && distance(nearest_entity.position, player.position) > 1) {
-      const next_position = path[path_index].position
-      const direction = get_direction(player.position, next_position)
-
-      player.walking_state = {
-        walking: true,
-        direction,
-      }
-
-      if (((next_position.x - player.position.x) ** 2 + (next_position.y - player.position.y) ** 2) < 0.01) {
-        task_manager.player_state.parameters_walk_to_entity.path_index = path_index + 1
-        log(`[AUTORIO] Moving to next path index: ${task_manager.player_state.parameters_walk_to_entity.path_index}`)
-      }
-      // no need to square root
-      if (((nearest_entity.position.x - player.position.x) ** 2 + (nearest_entity.position.y - player.position.y) ** 2) < 0.01) {
-        log('[AUTORIO] Reached target entity, switching to IDLE state')
-
-        // fix final position, avoid walked to the target but cannot interact with it
-        player.teleport(nearest_entity.position)
-
-        task_manager.reset_task_state()
-        task_manager.next_task()
-      }
-    }
-    else {
-      rendering.clear()
-      player.walking_state = { walking: false, direction: player.walking_state.direction }
-
-      log('[AUTORIO] Task completed, switching to IDLE state')
-      task_manager.reset_task_state()
-      task_manager.next_task()
-    }
-  }
 }
 
 function state_mining(player: LuaPlayer) {
@@ -523,21 +524,28 @@ function state_mining(player: LuaPlayer) {
     return
   }
 
-  const nearest_entity = player.surface.find_entities_filtered({
+  const entities = player.surface.find_entities_filtered({
     position: player.position,
-    radius: 2, // player can only mine entities within 2 tiles
+    radius: 5, // but player can only mine entities within 2 tiles
     name: task_manager.player_state.parameters_mine_entity.entity_name,
-    limit: 1,
-  })[0]
+  })
 
-  if (nearest_entity !== undefined) {
-    start_mining(player, nearest_entity.position)
-  }
-  else {
+  if (entities.length === 0) {
     log('[AUTORIO] No entity found to mine, switching to IDLE state')
     task_manager.reset_task_state()
     task_manager.next_task()
+    return
   }
+
+  const nearest_entity = get_nearest_entity(player, entities)
+  if (!nearest_entity) {
+    log('[AUTORIO] No entity found to mine, switching to IDLE state')
+    task_manager.reset_task_state()
+    task_manager.next_task()
+    return
+  }
+
+  start_mining(player, nearest_entity.position)
 }
 
 function state_placing(player: LuaPlayer) {
