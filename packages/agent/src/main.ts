@@ -1,9 +1,10 @@
+import { exit } from 'node:process'
 import { Format, setGlobalFormat, useLogg } from '@guiiai/logg'
 import { execa } from 'execa'
-import { client, v2FactorioConsoleCommandMessagePost, v2FactorioConsoleCommandRawPost } from 'factorio-rcon-api-client'
 
+import { client, v2FactorioConsoleCommandMessagePost, v2FactorioConsoleCommandRawPost } from 'factorio-rcon-api-client'
 import { factorioConfig, initEnv, rconClientConfig } from './config'
-import { handleMessage } from './message-handler'
+import { handleMessage } from './llm/message-handler'
 import { parseChatMessage } from './parser'
 
 setGlobalFormat(Format.Pretty)
@@ -50,9 +51,13 @@ async function main() {
 
     await v2FactorioConsoleCommandMessagePost({
       body: {
-        message: llmResponse.taskDescription,
+        message: llmResponse.chatMessage,
       },
     })
+
+    if (llmResponse.taskCommands.length === 0) {
+      continue
+    }
 
     const command = llmResponse.taskCommands.join(';')
     await v2FactorioConsoleCommandRawPost({

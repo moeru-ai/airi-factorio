@@ -6,7 +6,7 @@ export interface ChatMessage {
 }
 
 export interface LLMMessage {
-  taskDescription: string
+  chatMessage: string
   taskCommands: string[]
 }
 

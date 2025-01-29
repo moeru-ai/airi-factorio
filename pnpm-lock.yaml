@@ -35,6 +35,9 @@ importers:
       '@guiiai/logg':
         specifier: ^1.0.7
         version: 1.0.7
+      '@typeschema/zod':
+        specifier: ^0.14.0
+        version: 0.14.0(@types/json-schema@7.0.15)(zod-to-json-schema@3.24.1(zod@3.24.1))(zod@3.24.1)
       '@xsai/generate-text':
         specifier: ^0.0.30
         version: 0.0.30
@@ -49,7 +52,13 @@ importers:
         version: 2.0.4
       neuri:
         specifier: ^0.0.19
-        version: 0.0.19(@types/json-schema@7.0.15)
+        version: 0.0.19(@types/json-schema@7.0.15)(@typeschema/zod@0.14.0(@types/json-schema@7.0.15)(zod-to-json-schema@3.24.1(zod@3.24.1))(zod@3.24.1))(zod@3.24.1)
+      zod:
+        specifier: ^3.24.1
+        version: 3.24.1
+      zod-to-json-schema:
+        specifier: ^3.24.1
+        version: 3.24.1(zod@3.24.1)
     devDependencies:
       '@types/node':
         specifier: ^22.13.0
@@ -927,6 +936,17 @@ packages:
       '@typeschema/yup':
         optional: true
       '@typeschema/zod':
+        optional: true
+
+  '@typeschema/zod@0.14.0':
+    resolution: {integrity: sha512-oEX3lQFVKyGCmAV3KtVS290WpFukg/ZBXMOYpLFH/POlCaU8ojCJu5ehYvNDPZNK/f1KK9Vqlo28f7YX2g3O5w==}
+    peerDependencies:
+      zod: ^3.23.8
+      zod-to-json-schema: ^3.23.2
+    peerDependenciesMeta:
+      zod:
+        optional: true
+      zod-to-json-schema:
         optional: true
 
   '@typescript-eslint/eslint-plugin@8.22.0':
@@ -2840,6 +2860,14 @@ packages:
     resolution: {integrity: sha512-GQHQqAopRhwU8Kt1DDM8NjibDXHC8eoh1erhGAJPEyveY9qqVeXvVikNKrDz69sHowPMorbPUrH/mx8c50eiBQ==}
     engines: {node: '>=18'}
 
+  zod-to-json-schema@3.24.1:
+    resolution: {integrity: sha512-3h08nf3Vw3Wl3PK+q3ow/lIil81IT2Oa7YpQyUUDsEWbXveMesdfK1xBd2RhCkynwZndAxixji/7SYJJowr62w==}
+    peerDependencies:
+      zod: ^3.24.1
+
+  zod@3.24.1:
+    resolution: {integrity: sha512-muH7gBL9sI1nciMZV67X5fTKKBLtwpZ5VBp1vsOQzj1MhrBZ4wlVCm3gedKZWLp0Oyel8sIGfeiz54Su+OVT+A==}
+
   zwitch@2.0.4:
     resolution: {integrity: sha512-bXE4cR/kVZhKZX/RjPEflHaKVhUVl85noU3v6b8apfQEc1x4A+zBxjZ4lN8LqGd6WZ3dl98pY4o717VFmoPp+A==}
 
@@ -3478,9 +3506,20 @@ snapshots:
     optionalDependencies:
       '@types/json-schema': 7.0.15
 
-  '@typeschema/main@0.14.1(@types/json-schema@7.0.15)':
+  '@typeschema/main@0.14.1(@types/json-schema@7.0.15)(@typeschema/zod@0.14.0(@types/json-schema@7.0.15)(zod-to-json-schema@3.24.1(zod@3.24.1))(zod@3.24.1))':
     dependencies:
       '@typeschema/core': 0.14.0(@types/json-schema@7.0.15)
+    optionalDependencies:
+      '@typeschema/zod': 0.14.0(@types/json-schema@7.0.15)(zod-to-json-schema@3.24.1(zod@3.24.1))(zod@3.24.1)
+    transitivePeerDependencies:
+      - '@types/json-schema'
+
+  '@typeschema/zod@0.14.0(@types/json-schema@7.0.15)(zod-to-json-schema@3.24.1(zod@3.24.1))(zod@3.24.1)':
+    dependencies:
+      '@typeschema/core': 0.14.0(@types/json-schema@7.0.15)
+    optionalDependencies:
+      zod: 3.24.1
+      zod-to-json-schema: 3.24.1(zod@3.24.1)
     transitivePeerDependencies:
       - '@types/json-schema'
 
@@ -3638,9 +3677,9 @@ snapshots:
     dependencies:
       '@xsai/shared-chat': 0.0.29
 
-  '@xsai/tool@0.0.24(@types/json-schema@7.0.15)(@xsai/generate-text@0.0.24)':
+  '@xsai/tool@0.0.24(@types/json-schema@7.0.15)(@typeschema/zod@0.14.0(@types/json-schema@7.0.15)(zod-to-json-schema@3.24.1(zod@3.24.1))(zod@3.24.1))(@xsai/generate-text@0.0.24)':
     dependencies:
-      '@typeschema/main': 0.14.1(@types/json-schema@7.0.15)
+      '@typeschema/main': 0.14.1(@types/json-schema@7.0.15)(@typeschema/zod@0.14.0(@types/json-schema@7.0.15)(zod-to-json-schema@3.24.1(zod@3.24.1))(zod@3.24.1))
       '@xsai/shared': 0.0.29
     optionalDependencies:
       '@xsai/generate-text': 0.0.24
@@ -4984,18 +5023,18 @@ snapshots:
 
   natural-orderby@5.0.0: {}
 
-  neuri@0.0.19(@types/json-schema@7.0.15):
+  neuri@0.0.19(@types/json-schema@7.0.15)(@typeschema/zod@0.14.0(@types/json-schema@7.0.15)(zod-to-json-schema@3.24.1(zod@3.24.1))(zod@3.24.1))(zod@3.24.1):
     dependencies:
       '@guiiai/logg': 1.0.7
-      '@typeschema/main': 0.14.1(@types/json-schema@7.0.15)
+      '@typeschema/main': 0.14.1(@types/json-schema@7.0.15)(@typeschema/zod@0.14.0(@types/json-schema@7.0.15)(zod-to-json-schema@3.24.1(zod@3.24.1))(zod@3.24.1))
       '@xsai/generate-text': 0.0.24
       '@xsai/providers': 0.0.24
       '@xsai/shared-chat': 0.0.24
       '@xsai/stream-text': 0.0.24
-      '@xsai/tool': 0.0.24(@types/json-schema@7.0.15)(@xsai/generate-text@0.0.24)
+      '@xsai/tool': 0.0.24(@types/json-schema@7.0.15)(@typeschema/zod@0.14.0(@types/json-schema@7.0.15)(zod-to-json-schema@3.24.1(zod@3.24.1))(zod@3.24.1))(@xsai/generate-text@0.0.24)
       defu: 6.1.4
       nanoid: 5.0.9
-      openai: 4.80.1
+      openai: 4.80.1(zod@3.24.1)
     transitivePeerDependencies:
       - '@types/json-schema'
       - '@typeschema/arktype'
@@ -5065,7 +5104,7 @@ snapshots:
     dependencies:
       mimic-fn: 2.1.0
 
-  openai@4.80.1:
+  openai@4.80.1(zod@3.24.1):
     dependencies:
       '@types/node': 18.19.74
       '@types/node-fetch': 2.6.12
@@ -5074,6 +5113,8 @@ snapshots:
       form-data-encoder: 1.7.2
       formdata-node: 4.4.1
       node-fetch: 2.7.0
+    optionalDependencies:
+      zod: 3.24.1
     transitivePeerDependencies:
       - encoding
 
@@ -5756,5 +5797,11 @@ snapshots:
   yocto-queue@0.1.0: {}
 
   yoctocolors@2.1.1: {}
+
+  zod-to-json-schema@3.24.1(zod@3.24.1):
+    dependencies:
+      zod: 3.24.1
+
+  zod@3.24.1: {}
 
   zwitch@2.0.4: {}
