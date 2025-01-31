@@ -15,27 +15,14 @@ import type {
 
 import { new_task_manager } from './task_manager'
 import { TaskStates } from './types'
+import { get_inventory_items, type InventoryItem } from './utils/inventory'
 import { distance } from './utils/math'
+
+import './tools'
 
 let setup_complete = false
 
 const task_manager = new_task_manager()
-
-interface InventoryItem {
-  name: string
-  count: number
-}
-
-function get_inventory_items(player_id: number): InventoryItem[] {
-  const player = game.connected_players[player_id - 1]
-
-  const main_inventory = player.get_main_inventory()
-  if (!main_inventory) {
-    return []
-  }
-
-  return main_inventory.get_contents().map(({ name, count }) => ({ name, count }))
-}
 
 function log_player_info(player_id: number) {
   // compact for lua array index
@@ -260,13 +247,6 @@ remote.add_interface('autorio_tasks', {
   },
   log_player_info: (player_id: number) => {
     log_player_info(player_id)
-    return true
-  },
-})
-
-remote.add_interface('autorio_tools', {
-  get_inventory_items: (player_id: number) => {
-    rcon.print(serpent.block(get_inventory_items(player_id)))
     return true
   },
 })

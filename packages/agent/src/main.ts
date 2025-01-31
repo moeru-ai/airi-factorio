@@ -1,4 +1,3 @@
-import { exit } from 'node:process'
 import { Format, setGlobalFormat, useLogg } from '@guiiai/logg'
 import { execa } from 'execa'
 
