@@ -1,0 +1,12 @@
+{
+  "recommendations": [
+    "streetsidesoftware.code-spell-checker",
+    "mikestead.dotenv",
+    "EditorConfig.EditorConfig",
+    "usernamehw.errorlens",
+    "dbaeumer.vscode-eslint",
+    "yzhang.markdown-all-in-one",
+    "vitest.explorer",
+    "redhat.vscode-yaml"
+  ]
+}
