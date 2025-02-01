@@ -4,6 +4,8 @@ export default antfu({
   rules: {
     'ts/naming-convention': 'off',
   },
+  yaml: false,
+  markdown: false,
 }, {
   rules: {
     'ts/naming-convention': 'error',

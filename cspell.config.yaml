@@ -3,9 +3,17 @@ ignorePaths: []
 dictionaryDefinitions: []
 dictionaries: []
 words:
-  - "AUTORIO"
-  - "Factorio"
-  - LemonNekoGH
+  - AUTORIO
+  - dotenvx
+  - Factorio
+  - guiiai
   - LemonNeko
+  - LemonNekoGH
+  - logg
+  - moeru
+  - neuri
+  - rcon
+  - tstl
+  - xsai
 ignoreWords: []
 import: []
