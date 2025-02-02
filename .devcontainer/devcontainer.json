@@ -1,9 +1,9 @@
 {
   "name": "airi-factorio",
-  "build": {
-    "dockerfile": "Dockerfile"
-  },
-  "runArgs": ["--network=host"],
+  "dockerComposeFile": ["./docker-compose.yml"],
+  "service": "airi-factorio",
+  "shutdownAction": "none",
+  "workspaceFolder": "/workspace/",
   "customizations": {
     "vscode": {
       "extensions": [
