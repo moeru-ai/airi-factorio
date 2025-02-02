@@ -9,8 +9,8 @@ importers:
   .:
     devDependencies:
       '@antfu/eslint-config':
-        specifier: ^4.1.0
-        version: 4.1.0(@typescript-eslint/utils@8.22.0(eslint@9.19.0(jiti@2.4.2))(typescript@5.7.3))(@vue/compiler-sfc@3.5.13)(eslint@9.19.0(jiti@2.4.2))(typescript@5.7.3)
+        specifier: ^4.1.1
+        version: 4.1.1(@typescript-eslint/utils@8.22.0(eslint@9.19.0(jiti@2.4.2))(typescript@5.7.3))(@vue/compiler-sfc@3.5.13)(eslint@9.19.0(jiti@2.4.2))(typescript@5.7.3)
       '@antfu/ni':
         specifier: ^23.3.1
         version: 23.3.1
@@ -48,8 +48,8 @@ importers:
         specifier: ^2.0.4
         version: 2.0.4
       neuri:
-        specifier: ^0.0.19
-        version: 0.0.19(@types/json-schema@7.0.15)(@typeschema/zod@0.14.0(@types/json-schema@7.0.15)(zod-to-json-schema@3.24.1(zod@3.24.1))(zod@3.24.1))(zod@3.24.1)
+        specifier: ^0.0.20
+        version: 0.0.20(@types/json-schema@7.0.15)(@typeschema/zod@0.14.0(@types/json-schema@7.0.15)(zod-to-json-schema@3.24.1(zod@3.24.1))(zod@3.24.1))(zod@3.24.1)
       zod:
         specifier: ^3.24.1
         version: 3.24.1
@@ -70,8 +70,8 @@ importers:
   packages/autorio:
     devDependencies:
       '@antfu/eslint-config':
-        specifier: ^4.1.0
-        version: 4.1.0(@typescript-eslint/utils@8.22.0(eslint@9.19.0(jiti@2.4.2))(typescript@5.7.3))(@vue/compiler-sfc@3.5.13)(eslint@9.19.0(jiti@2.4.2))(typescript@5.7.3)
+        specifier: ^4.1.1
+        version: 4.1.1(@typescript-eslint/utils@8.22.0(eslint@9.19.0(jiti@2.4.2))(typescript@5.7.3))(@vue/compiler-sfc@3.5.13)(eslint@9.19.0(jiti@2.4.2))(typescript@5.7.3)
       eslint:
         specifier: ^9.19.0
         version: 9.19.0(jiti@2.4.2)
@@ -80,13 +80,13 @@ importers:
         version: 2.13.1
       typed-factorio:
         specifier: ^3.13.1
-        version: 3.13.1(lua-types@2.13.1)(typescript-to-lua@1.29.1(typescript@5.7.3))
+        version: 3.13.1(lua-types@2.13.1)(typescript-to-lua@1.30.0(typescript@5.7.3))
       typescript:
         specifier: ^5.7.3
         version: 5.7.3
       typescript-to-lua:
-        specifier: ^1.29.1
-        version: 1.29.1(typescript@5.7.3)
+        specifier: ^1.30.0
+        version: 1.30.0(typescript@5.7.3)
 
 packages:
 
@@ -94,8 +94,8 @@ packages:
     resolution: {integrity: sha512-30iZtAPgz+LTIYoeivqYo853f02jBYSd5uGnGpkFV0M3xOt9aN73erkgYAmZU43x4VfqcnLxW9Kpg3R5LC4YYw==}
     engines: {node: '>=6.0.0'}
 
-  '@antfu/eslint-config@4.1.0':
-    resolution: {integrity: sha512-2yainF3mBykqzsxXbHYGuLwm60sRRzQqJdLJd2IfESIGkkIkQfUI3IEGTANGpdWSmiC9jhICP7Y8yY+TSKGUQg==}
+  '@antfu/eslint-config@4.1.1':
+    resolution: {integrity: sha512-5UVRu8uC6Q9e+o49ppafvIfOT3geqo74bZNAZ1Rvx10OF8gkUh7gT6b5yEJkUeej3WHRyVw3kTTgK52To1E+VQ==}
     hasBin: true
     peerDependencies:
       '@eslint-react/eslint-plugin': ^1.19.0
@@ -1024,43 +1024,31 @@ packages:
   '@vue/shared@3.5.13':
     resolution: {integrity: sha512-/hnE/qP5ZoGpol0a5mDi45bOd7t3tjYJBjsgCsivow7D48cJeV5l05RD82lPqi7gRiphZM37rnhW1l6ZoCNNnQ==}
 
-  '@xsai/generate-text@0.0.24':
-    resolution: {integrity: sha512-jUKhC+vv8y5XE91pazzU1idLnmydW6UVhP8gJFVG8e6RbFypTD5d2Xf3wBVDbFJe7adoyLrL2APgcxZzQ3WJQQ==}
-
   '@xsai/generate-text@0.0.30':
     resolution: {integrity: sha512-SfqW35st6hkpsD3OlCD4xMMvCBiFBtcJd9t0uAFw75ruK+4UWYN21tmZ6fla0ysUABb6Is7HEA5/MUxvGyfBPA==}
-
-  '@xsai/providers@0.0.24':
-    resolution: {integrity: sha512-bZisxprgEwsUqvTJZphfbNXi8ZisGdyJUH4ik5joGIqCW6yBQNtUSlRJLTw6Ej6Mx6WjaOTZC9PKUZuUDEGvsg==}
 
   '@xsai/providers@0.0.30':
     resolution: {integrity: sha512-GJSN7AhO5vMzgrox9iGQSI4anuT+8ZPupnli42Do0rl+LkkO/TvsMTywocwzWktyfvl0cccCoSiuoK0beWliEA==}
 
-  '@xsai/shared-chat@0.0.24':
-    resolution: {integrity: sha512-27sW2f5ev2J4A137yinkdZnhuRP3HR2u1BsMV2ZzbGzYUwpfZnctI0tZgeG3CRz9TG22o+MRaUOLeGoBhC+fag==}
-
-  '@xsai/shared-chat@0.0.29':
-    resolution: {integrity: sha512-bp9TLM9NJkHR5FyK+ZSnLJ0d8ngTfRbMhHEi9RvZoCoGqRt51vtBaBOzfqk3Umpy3O5tb4hg2RZE1+gf1IUI4Q==}
-
   '@xsai/shared-chat@0.0.30':
     resolution: {integrity: sha512-zSxj4q6ZWTnSkD5LqLq1O2xrjg3d5Br35hyrAxI4jY7SwJqkCLmGl3Bn7jgnqVj4l6lzhEbbjpV1bMSoqv913Q==}
-
-  '@xsai/shared@0.0.29':
-    resolution: {integrity: sha512-PfbyqL4OaC1PakJjghONCw9VqMkbo6CZqU/Qo72xqLQuL5yVNa5t6Q1NSkQ3FOvHo96gYi1l1cgICT4DILDEfw==}
 
   '@xsai/shared@0.0.30':
     resolution: {integrity: sha512-k2Xb/Q4WTaN/2eBgZaPDhNYroBSpK0HcW7XNJp1qB4xBoA/z9h7mOMjzfTVyqhZzyZkpXTLJVu2txpI351dRHA==}
 
-  '@xsai/stream-text@0.0.24':
-    resolution: {integrity: sha512-2Focgo62pKPpSgJ6PkHFZ2gP4vUBdjhSU1DRrHf9nR5kp/lWmyi3bNl0T/Cl59139kW5V5sTNXNfLb9mumXkKQ==}
+  '@xsai/stream-text@0.0.30':
+    resolution: {integrity: sha512-olDZ0Z3ddwT0R97nP9IpSWil4r6q2LhSykYwiYNi2rnQjV0HTGwJfOe5CEcs2L9cX0cUBmnZTy9MrMJstZ7Mag==}
 
-  '@xsai/tool@0.0.24':
-    resolution: {integrity: sha512-QRIwqSTg8FpR+spIa0S2gUBqyber2I9CR2r0r9/rn3Keua0otkgNTvVXVSxa3l8M6qaFylmSRg5NeLGX+suLiQ==}
+  '@xsai/tool@0.0.30':
+    resolution: {integrity: sha512-sxxnBGLUiW6qbXyqb0kiSDVBGN/9Bb70oj2Xd6tCyKI/VPfX/jgFMKtP85GDS8xzVXqn7QELfxvKnRJv+scFbg==}
     peerDependencies:
-      '@xsai/generate-text': 0.0.24
+      '@xsai/generate-text': 0.0.30
     peerDependenciesMeta:
       '@xsai/generate-text':
         optional: true
+
+  '@xsai/utils-chat@0.0.30':
+    resolution: {integrity: sha512-da4T7vwAgM7abFVaggc7RmVPjLAAKTYPX5pBG3MXLwbZY61V5Vkff6+pdSMhjbtwNm20lCkCYxLCwolbz8buFA==}
 
   abort-controller@3.0.0:
     resolution: {integrity: sha512-h8lQ8tacZYnR3vNQTgibj+tODHI5/+l06Au2Pcriv/Gmet0eaj4TwWH41sO9wnHDiQsEj19q0drzdWdeAHtweg==}
@@ -1402,13 +1390,13 @@ packages:
     peerDependencies:
       eslint: '>=6.0.0'
 
-  eslint-config-flat-gitignore@1.0.0:
-    resolution: {integrity: sha512-EWpSLrAP80IdcYK5sIhq/qAY0pmUdBnbzqzpE3QAn6H6wLBN26cMRoMNU9Di8upTzUSL6TXeYRxWhTYuz8+UQA==}
+  eslint-config-flat-gitignore@2.0.0:
+    resolution: {integrity: sha512-9iH+DZO94uxsw5iFjzqa9GfahA5oK3nA1GoJK/6u8evAtooYJMwuSWiLcGDfrdLoqdQ5/kqFJKKuMY/+SAasvg==}
     peerDependencies:
       eslint: ^9.5.0
 
-  eslint-flat-config-utils@2.0.0:
-    resolution: {integrity: sha512-AbpYwI9FBmjF6BQ8UcaDCrM750DWEB6UJzEjQEg+iWFP6UX9rGsUGJlMf7sWbW3dOA0klUEwmWGZa5FoynXU/w==}
+  eslint-flat-config-utils@2.0.1:
+    resolution: {integrity: sha512-brf0eAgQ6JlKj3bKfOTuuI7VcCZvi8ZCD1MMTVoEvS/d38j8cByZViLFALH/36+eqB17ukmfmKq3bWzGvizejA==}
 
   eslint-import-resolver-node@0.3.9:
     resolution: {integrity: sha512-WFj2isz22JahUv+B788TlO3N6zL3nNJGU8CcZbPZvVEkBPaJdCV4vy5wyghty5ROFbCRnm132v8BScu5/1BQ8g==}
@@ -1627,10 +1615,6 @@ packages:
   fill-range@7.1.1:
     resolution: {integrity: sha512-YsGpe3WHLK8ZYi4tWDg2Jy3ebRz2rXowDxnld4bkQB00cc/1Zw9AWnC0i9ztDJitivtQvaI9KaLyKrc+hBW0yg==}
     engines: {node: '>=8'}
-
-  find-up-simple@1.0.0:
-    resolution: {integrity: sha512-q7Us7kcjj2VMePAa02hDAF6d+MzsdsAWEwYyOpwUtlerRBkOEPBCRZrAV4XfcSN8fHAgaD0hP7miwoay6DCprw==}
-    engines: {node: '>=18'}
 
   find-up@4.1.0:
     resolution: {integrity: sha512-PpOwAdQ/YlXQ2vj8a3h8IipDuYRi3wceVQQGYWxNINccq40Anw7BlsEXCMbt1Zt+OLA6Fq9suIpIWD0OsnISlw==}
@@ -2125,8 +2109,8 @@ packages:
     resolution: {integrity: sha512-kKHJhxwpR/Okycz4HhQKKlhWe4ASEfPgkSWNmKFHd7+ezuQlxkA5cM3+XkBPvm1gmHen3w53qsYAv+8GwRrBlg==}
     engines: {node: '>=18'}
 
-  neuri@0.0.19:
-    resolution: {integrity: sha512-Fr1sFbFlyyg0+xWd6UT90wmPcFqxQUhDh9qs5YFc+T8SbRul/LbGy0Cg52y/6VTVbp1cu4yb8AIfpJCmvxtzrA==}
+  neuri@0.0.20:
+    resolution: {integrity: sha512-JQFz9hZBRcAvm6XCv1TzaGYu0jpED7wjMVtLLgpnTvYVL5Zt9ul3KeNmd6DuBhQ/OaggEw+zza61HKBIgfs2+Q==}
 
   node-domexception@1.0.0:
     resolution: {integrity: sha512-/jKZoMpw0F8GRwl4/eLROPA3cfcXtLApP0QzLmUT/HuPCZWyB7IY9ZrMeKw2O/nFIqPQB3PVM9aYm0F312AXDQ==}
@@ -2176,8 +2160,8 @@ packages:
     resolution: {integrity: sha512-kbpaSSGJTWdAY5KPVeMOKXSrPtr8C8C7wodJbcsd51jRnmD+GZu8Y0VoU6Dm5Z4vWr0Ig/1NKuWRKf7j5aaYSg==}
     engines: {node: '>=6'}
 
-  openai@4.80.1:
-    resolution: {integrity: sha512-+6+bbXFwbIE88foZsBEt36bPkgZPdyFN82clAXG61gnHb2gXdZApDyRrcAHqEtpYICywpqaNo57kOm9dtnb7Cw==}
+  openai@4.82.0:
+    resolution: {integrity: sha512-1bTxOVGZuVGsKKUWbh3BEwX1QxIXUftJv+9COhhGGVDTFwiaOd4gWsMynF2ewj1mg6by3/O+U8+EEHpWRdPaJg==}
     hasBin: true
     peerDependencies:
       ws: ^8.18.0
@@ -2719,8 +2703,8 @@ packages:
       lua-types: ^2.13.1
       typescript-to-lua: ^1.10.0
 
-  typescript-to-lua@1.29.1:
-    resolution: {integrity: sha512-5/A/P9tIOEboGfPLg3XnyVkesHS9WxFfpW6Sq9BVXSCp/O5ucYY9psq5nv/oFd1Do+EbxmZvSPFFtlzfuiPJsg==}
+  typescript-to-lua@1.30.0:
+    resolution: {integrity: sha512-PdHtvJ/vZBbZty13V7yjhgbPM1Hh2yVENGdB9QJOWEPufAfmz21KGPslDrGXPty0M0EQkBrWSIRvzJdk+JfBzg==}
     engines: {node: '>=16.10.0'}
     hasBin: true
     peerDependencies:
@@ -2875,7 +2859,7 @@ snapshots:
       '@jridgewell/gen-mapping': 0.3.8
       '@jridgewell/trace-mapping': 0.3.25
 
-  '@antfu/eslint-config@4.1.0(@typescript-eslint/utils@8.22.0(eslint@9.19.0(jiti@2.4.2))(typescript@5.7.3))(@vue/compiler-sfc@3.5.13)(eslint@9.19.0(jiti@2.4.2))(typescript@5.7.3)':
+  '@antfu/eslint-config@4.1.1(@typescript-eslint/utils@8.22.0(eslint@9.19.0(jiti@2.4.2))(typescript@5.7.3))(@vue/compiler-sfc@3.5.13)(eslint@9.19.0(jiti@2.4.2))(typescript@5.7.3)':
     dependencies:
       '@antfu/install-pkg': 1.0.0
       '@clack/prompts': 0.9.1
@@ -2886,8 +2870,8 @@ snapshots:
       '@typescript-eslint/parser': 8.22.0(eslint@9.19.0(jiti@2.4.2))(typescript@5.7.3)
       '@vitest/eslint-plugin': 1.1.25(@typescript-eslint/utils@8.22.0(eslint@9.19.0(jiti@2.4.2))(typescript@5.7.3))(eslint@9.19.0(jiti@2.4.2))(typescript@5.7.3)
       eslint: 9.19.0(jiti@2.4.2)
-      eslint-config-flat-gitignore: 1.0.0(eslint@9.19.0(jiti@2.4.2))
-      eslint-flat-config-utils: 2.0.0
+      eslint-config-flat-gitignore: 2.0.0(eslint@9.19.0(jiti@2.4.2))
+      eslint-flat-config-utils: 2.0.1
       eslint-merge-processors: 1.0.0(eslint@9.19.0(jiti@2.4.2))
       eslint-plugin-antfu: 3.0.0(eslint@9.19.0(jiti@2.4.2))
       eslint-plugin-command: 3.0.0(eslint@9.19.0(jiti@2.4.2))
@@ -3639,48 +3623,30 @@ snapshots:
 
   '@vue/shared@3.5.13': {}
 
-  '@xsai/generate-text@0.0.24':
-    dependencies:
-      '@xsai/shared-chat': 0.0.29
-
   '@xsai/generate-text@0.0.30':
     dependencies:
       '@xsai/shared-chat': 0.0.30
-
-  '@xsai/providers@0.0.24':
-    dependencies:
-      '@xsai/shared': 0.0.29
 
   '@xsai/providers@0.0.30':
     dependencies:
       '@xsai/shared': 0.0.30
 
-  '@xsai/shared-chat@0.0.24':
-    dependencies:
-      '@xsai/shared': 0.0.29
-
-  '@xsai/shared-chat@0.0.29':
-    dependencies:
-      '@xsai/shared': 0.0.29
-
   '@xsai/shared-chat@0.0.30':
     dependencies:
       '@xsai/shared': 0.0.30
 
-  '@xsai/shared@0.0.29': {}
-
   '@xsai/shared@0.0.30': {}
 
-  '@xsai/stream-text@0.0.24':
+  '@xsai/stream-text@0.0.30':
     dependencies:
-      '@xsai/shared-chat': 0.0.29
+      '@xsai/shared-chat': 0.0.30
 
-  '@xsai/tool@0.0.24(@types/json-schema@7.0.15)(@typeschema/zod@0.14.0(@types/json-schema@7.0.15)(zod-to-json-schema@3.24.1(zod@3.24.1))(zod@3.24.1))(@xsai/generate-text@0.0.24)':
+  '@xsai/tool@0.0.30(@types/json-schema@7.0.15)(@typeschema/zod@0.14.0(@types/json-schema@7.0.15)(zod-to-json-schema@3.24.1(zod@3.24.1))(zod@3.24.1))(@xsai/generate-text@0.0.30)':
     dependencies:
       '@typeschema/main': 0.14.1(@types/json-schema@7.0.15)(@typeschema/zod@0.14.0(@types/json-schema@7.0.15)(zod-to-json-schema@3.24.1(zod@3.24.1))(zod@3.24.1))
-      '@xsai/shared': 0.0.29
+      '@xsai/shared': 0.0.30
     optionalDependencies:
-      '@xsai/generate-text': 0.0.24
+      '@xsai/generate-text': 0.0.30
     transitivePeerDependencies:
       - '@types/json-schema'
       - '@typeschema/arktype'
@@ -3702,6 +3668,10 @@ snapshots:
       - '@typeschema/vine'
       - '@typeschema/yup'
       - '@typeschema/zod'
+
+  '@xsai/utils-chat@0.0.30':
+    dependencies:
+      '@xsai/shared-chat': 0.0.30
 
   abort-controller@3.0.0:
     dependencies:
@@ -4079,13 +4049,12 @@ snapshots:
       eslint: 9.19.0(jiti@2.4.2)
       semver: 7.6.3
 
-  eslint-config-flat-gitignore@1.0.0(eslint@9.19.0(jiti@2.4.2)):
+  eslint-config-flat-gitignore@2.0.0(eslint@9.19.0(jiti@2.4.2)):
     dependencies:
       '@eslint/compat': 1.2.5(eslint@9.19.0(jiti@2.4.2))
       eslint: 9.19.0(jiti@2.4.2)
-      find-up-simple: 1.0.0
 
-  eslint-flat-config-utils@2.0.0:
+  eslint-flat-config-utils@2.0.1:
     dependencies:
       pathe: 2.0.2
 
@@ -4422,8 +4391,6 @@ snapshots:
   fill-range@7.1.1:
     dependencies:
       to-regex-range: 5.0.1
-
-  find-up-simple@1.0.0: {}
 
   find-up@4.1.0:
     dependencies:
@@ -5021,18 +4988,19 @@ snapshots:
 
   natural-orderby@5.0.0: {}
 
-  neuri@0.0.19(@types/json-schema@7.0.15)(@typeschema/zod@0.14.0(@types/json-schema@7.0.15)(zod-to-json-schema@3.24.1(zod@3.24.1))(zod@3.24.1))(zod@3.24.1):
+  neuri@0.0.20(@types/json-schema@7.0.15)(@typeschema/zod@0.14.0(@types/json-schema@7.0.15)(zod-to-json-schema@3.24.1(zod@3.24.1))(zod@3.24.1))(zod@3.24.1):
     dependencies:
       '@guiiai/logg': 1.0.7
       '@typeschema/main': 0.14.1(@types/json-schema@7.0.15)(@typeschema/zod@0.14.0(@types/json-schema@7.0.15)(zod-to-json-schema@3.24.1(zod@3.24.1))(zod@3.24.1))
-      '@xsai/generate-text': 0.0.24
-      '@xsai/providers': 0.0.24
-      '@xsai/shared-chat': 0.0.24
-      '@xsai/stream-text': 0.0.24
-      '@xsai/tool': 0.0.24(@types/json-schema@7.0.15)(@typeschema/zod@0.14.0(@types/json-schema@7.0.15)(zod-to-json-schema@3.24.1(zod@3.24.1))(zod@3.24.1))(@xsai/generate-text@0.0.24)
+      '@xsai/generate-text': 0.0.30
+      '@xsai/providers': 0.0.30
+      '@xsai/shared-chat': 0.0.30
+      '@xsai/stream-text': 0.0.30
+      '@xsai/tool': 0.0.30(@types/json-schema@7.0.15)(@typeschema/zod@0.14.0(@types/json-schema@7.0.15)(zod-to-json-schema@3.24.1(zod@3.24.1))(zod@3.24.1))(@xsai/generate-text@0.0.30)
+      '@xsai/utils-chat': 0.0.30
       defu: 6.1.4
       nanoid: 5.0.9
-      openai: 4.80.1(zod@3.24.1)
+      openai: 4.82.0(zod@3.24.1)
     transitivePeerDependencies:
       - '@types/json-schema'
       - '@typeschema/arktype'
@@ -5102,7 +5070,7 @@ snapshots:
     dependencies:
       mimic-fn: 2.1.0
 
-  openai@4.80.1(zod@3.24.1):
+  openai@4.82.0(zod@3.24.1):
     dependencies:
       '@types/node': 18.19.74
       '@types/node-fetch': 2.6.12
@@ -5614,12 +5582,12 @@ snapshots:
 
   type-fest@0.8.1: {}
 
-  typed-factorio@3.13.1(lua-types@2.13.1)(typescript-to-lua@1.29.1(typescript@5.7.3)):
+  typed-factorio@3.13.1(lua-types@2.13.1)(typescript-to-lua@1.30.0(typescript@5.7.3)):
     dependencies:
       lua-types: 2.13.1
-      typescript-to-lua: 1.29.1(typescript@5.7.3)
+      typescript-to-lua: 1.30.0(typescript@5.7.3)
 
-  typescript-to-lua@1.29.1(typescript@5.7.3):
+  typescript-to-lua@1.30.0(typescript@5.7.3):
     dependencies:
       '@typescript-to-lua/language-extensions': 1.19.0
       enhanced-resolve: 5.8.2
