@@ -1,6 +1,7 @@
-import { createLogg } from '@guiiai/logg'
+import type { DefinedTool, Message } from 'neuri/openai'
 
-import { composeAgent, type DefinedTool, defineToolFunction, type Message, toolFunction } from 'neuri/openai'
+import { createLogg } from '@guiiai/logg'
+import { composeAgent, defineToolFunction, toolFunction } from 'neuri/openai'
 import { openaiConfig } from '../config'
 import { parseLLMMessage } from '../parser'
 import { prompt } from './prompt'
@@ -59,7 +60,7 @@ export async function handleMessage(message: string) {
   }
 
   if (!response.choices || !response.choices.length) {
-    logger.error('LLM responded with no choices')
+    logger.withFields({ response }).error('LLM responded with no choices')
 
     return null
   }

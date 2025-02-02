@@ -68,6 +68,4 @@ Solution:
 }
 
 CRITICAL: Your entire response must be a single JSON object. Do not include any explanations, markdown, or additional text. The response should be directly parseable as JSON.
-
-If there isn't a tool that you need, please tell me.
 `

@@ -19,7 +19,14 @@ remote.add_interface('autorio_tools', {
       return false
     }
 
-    rcon.print(serpent.block(recipe))
+    const ingredients = recipe.ingredients.map((ingredient) => {
+      return {
+        name: ingredient.name,
+        count: ingredient.amount,
+      }
+    })
+
+    rcon.print(serpent.block(ingredients))
     return true
   },
 })

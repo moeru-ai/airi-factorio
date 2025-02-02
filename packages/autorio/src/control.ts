@@ -13,9 +13,10 @@ import type {
   SurfaceCreateEntity,
 } from 'factorio:runtime'
 
+import type { InventoryItem } from './utils/inventory'
 import { new_task_manager } from './task_manager'
 import { TaskStates } from './types'
-import { get_inventory_items, type InventoryItem } from './utils/inventory'
+import { get_inventory_items } from './utils/inventory'
 import { distance } from './utils/math'
 
 import './tools'
