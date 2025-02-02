@@ -67,5 +67,7 @@ Solution:
   ]
 }
 
+If you can't execute the task, please still return a valid JSON object with the chatMessage and taskCommands.
+
 CRITICAL: Your entire response must be a single JSON object. Do not include any explanations, markdown, or additional text. The response should be directly parseable as JSON.
 `

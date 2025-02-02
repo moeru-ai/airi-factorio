@@ -5,6 +5,13 @@ export interface ChatMessage {
   date: string
 }
 
+export interface CommandMessage {
+  username: string
+  command: string
+  isServer: boolean
+  date: string
+}
+
 export interface LLMMessage {
   chatMessage: string
   taskCommands: string[]
@@ -12,6 +19,28 @@ export interface LLMMessage {
 
 export function parseLLMMessage(message: string): LLMMessage {
   return JSON.parse(message) as LLMMessage
+}
+
+export function parseCommandMessage(log: string): CommandMessage | null {
+  // example: 2025-02-02 12:08:24 [COMMAND] <server> (command): remote.call(\"autorio_tools\", \"get_recipe\", \"iron-chest\", 1)
+  const serverRegex = /(\d{4}-\d{2}-\d{2}) (\d{2}:\d{2}:\d{2}) \[COMMAND\] <server> \(command\): (.+)/
+  const serverMatch = log.match(serverRegex)
+
+  if (serverMatch) {
+    const [, date, , command] = serverMatch
+    return { username: 'server', command, isServer: true, date }
+  }
+
+  // example: 2000-01-02 12:34:56 [COMMAND] username (command): log('hello world')
+  const playerRegex = /(\d{4}-\d{2}-\d{2}) (\d{2}:\d{2}:\d{2}) \[COMMAND\] (.+?) \(command\): (.+)/
+  const playerMatch = log.match(playerRegex)
+
+  if (playerMatch) {
+    const [, date, , username, command] = playerMatch
+    return { username, command, isServer: false, date }
+  }
+
+  return null
 }
 
 export function parseChatMessage(log: string): ChatMessage | null {

@@ -50,6 +50,7 @@ export async function handleMessage(message: string) {
     },
   ]
 
+  // FIXME: but in xsai, but neuri depends on xsai, and new version of xsai fixed this issue
   const response = await agent(messages, {
     model: 'gpt-4o',
     maxRoundTrip: 10,

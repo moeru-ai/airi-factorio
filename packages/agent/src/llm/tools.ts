@@ -18,7 +18,7 @@ export const tools: ToolFunction[] = [
     schema: z.object({}),
     fn: async () => {
       const response = await v2FactorioConsoleCommandRawPost({ body: { input: '/c remote.call("autorio_tools", "get_inventory_items", 1)' } })
-      logger.withFields({ response }).debug('Inventory items')
+      logger.withFields({ response: response.data.output }).debug('Inventory items')
       return response.data.output
     },
   },
@@ -32,7 +32,7 @@ export const tools: ToolFunction[] = [
       logger.withFields(parameters).debug('Try to get recipe for item')
 
       const response = await v2FactorioConsoleCommandRawPost({ body: { input: `/c remote.call("autorio_tools", "get_recipe", "${parameters.item}", 1)` } })
-      logger.withFields({ response }).debug('Recipe')
+      logger.withFields({ response: response.data.output }).debug('Recipe')
       return response.data.output
     },
   },
