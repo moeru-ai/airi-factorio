@@ -35,9 +35,6 @@ importers:
       '@guiiai/logg':
         specifier: ^1.0.7
         version: 1.0.7
-      '@typeschema/zod':
-        specifier: ^0.14.0
-        version: 0.14.0(@types/json-schema@7.0.15)(zod-to-json-schema@3.24.1(zod@3.24.1))(zod@3.24.1)
       '@xsai/generate-text':
         specifier: ^0.0.30
         version: 0.0.30
@@ -3522,6 +3519,7 @@ snapshots:
       zod-to-json-schema: 3.24.1(zod@3.24.1)
     transitivePeerDependencies:
       - '@types/json-schema'
+    optional: true
 
   '@typescript-eslint/eslint-plugin@8.22.0(@typescript-eslint/parser@8.22.0(eslint@9.19.0(jiti@2.4.2))(typescript@5.7.3))(eslint@9.19.0(jiti@2.4.2))(typescript@5.7.3)':
     dependencies:
