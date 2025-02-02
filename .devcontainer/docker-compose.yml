@@ -10,6 +10,8 @@ services:
     volumes:
       # Mount the root folder that contains .git
       - ../:/workspace:cached
+    entrypoint: /bin/bash
+    command: ["-c", "trap : TERM INT; sleep infinity & wait"]
   rcon-api:
     image: ghcr.io/nekomeowww/factorio-rcon-api:2.0.5
     network_mode: host

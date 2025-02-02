@@ -1,7 +1,9 @@
+import type { ResultPromise } from 'execa'
+import { arch } from 'node:os'
 import { Format, setGlobalFormat, useLogg } from '@guiiai/logg'
 import { execa } from 'execa'
-
 import { client, v2FactorioConsoleCommandMessagePost, v2FactorioConsoleCommandRawPost } from 'factorio-rcon-api-client'
+
 import { factorioConfig, initEnv, rconClientConfig } from './config'
 import { handleMessage } from './llm/message-handler'
 import { parseChatMessage } from './parser'
@@ -19,16 +21,35 @@ async function main() {
   const gameLogger = useLogg('game').useGlobalConfig()
 
   // TODO: how to restart factorio when mod changes? And is this necessary?
-  const factorioInst = execa(factorioConfig.path, [
-    '--start-server',
-    factorioConfig.savePath,
-    '--rcon-password',
-    factorioConfig.rconPassword,
-    '--rcon-port',
-    factorioConfig.rconPort.toString(),
-  ], {
-    stdout: ['pipe', 'inherit'],
-  })
+  let factorioInst: ResultPromise<{
+    stdout: ('pipe' | 'inherit')[]
+  }>
+
+  if (arch() === 'arm64') {
+    factorioInst = execa('/bin/box64', [
+      factorioConfig.path,
+      '--start-server',
+      factorioConfig.savePath,
+      '--rcon-password',
+      factorioConfig.rconPassword,
+      '--rcon-port',
+      factorioConfig.rconPort.toString(),
+    ], {
+      stdout: ['pipe', 'inherit'],
+    })
+  }
+  else {
+    factorioInst = execa(factorioConfig.path, [
+      '--start-server',
+      factorioConfig.savePath,
+      '--rcon-password',
+      factorioConfig.rconPassword,
+      '--rcon-port',
+      factorioConfig.rconPort.toString(),
+    ], {
+      stdout: ['pipe', 'inherit'],
+    })
+  }
 
   for await (const line of factorioInst.iterable()) {
     const chatMessage = parseChatMessage(line)
