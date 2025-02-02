@@ -1,5 +1,5 @@
 {
-  "name": "@moeru-ai/factorio-agent",
+  "name": "@proj-airi/factorio-agent",
   "type": "module",
   "version": "0.1.0",
   "packageManager": "pnpm@10.1.0",
