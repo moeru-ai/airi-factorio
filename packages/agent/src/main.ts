@@ -36,12 +36,11 @@ async function main() {
     if (!chatMessage) {
       continue
     }
-
     if (chatMessage.isServer) {
       continue
     }
 
-    gameLogger.log(`[chat] ${chatMessage.username}: ${chatMessage.message}`)
+    gameLogger.withContext('chat').log(`${chatMessage.username}: ${chatMessage.message}`)
 
     const llmResponse = await handleMessage(chatMessage.message)
     if (!llmResponse) {
