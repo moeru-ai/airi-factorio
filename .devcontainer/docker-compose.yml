@@ -1,0 +1,19 @@
+# Connect to multiple containers
+# https://code.visualstudio.com/remote/advancedcontainers/connect-multiple-containers
+
+services:
+  airi-factorio:
+    build:
+      context: ../
+      dockerfile: ./.devcontainer/Dockerfile
+    network_mode: host
+    volumes:
+      # Mount the root folder that contains .git
+      - ../:/workspace:cached
+  rcon-api:
+    image: ghcr.io/nekomeowww/factorio-rcon-api:2.0.5
+    network_mode: host
+    environment:
+      FACTORIO_RCON_HOST: host.docker.internal
+      FACTORIO_RCON_PORT: 27015
+      FACTORIO_RCON_PASSWORD: 123456
