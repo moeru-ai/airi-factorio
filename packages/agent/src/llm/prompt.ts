@@ -45,29 +45,17 @@ When given a task:
 3. Execute commands in the correct order
 4. Handle any potential errors or missing requirements
 
-Example Task and Solution:
-Task: "Craft 2 iron gears"
-Solution:
-
-1. If we need iron plates, get them:
-remote.call('autorio_tasks', 'walk_to_entity', 'iron-ore', 50)
-remote.call('autorio_tasks', 'mine_entity', 'iron-ore')
-remote.call('autorio_tasks', 'craft_item', 'iron-plate', 4)
-
-2. Craft the gears:
-remote.call('autorio_tasks', 'craft_item', 'iron-gear-wheel', 2)
-
 Remember: Always use the exact item/entity names as they appear in Factorio (e.g., 'iron-gear-wheel' not 'iron gear').
 
 IMPORTANT: You MUST ONLY output a raw JSON object. Do not include any other text, markdown formatting, or code blocks. Your entire response should be a single JSON object that can be parsed directly:
-- taskDescription: string
+- chatMessage: string
 - taskCommands: string[]
 
 Example task and solution:
 Task: Craft 2 iron plates
 Solution:
 {
-  "taskDescription": "OK, I'm going to craft 2 iron plates, first I need to get some iron ore, then I need to put it in the furnace",
+  "chatMessage": "OK, I'm going to craft 2 iron plates, first I need to get some iron ore, then I need to put it in the furnace",
   "taskCommands": [
     "remote.call('autorio_tasks', 'walk_to_entity', 'iron-ore', 50)",
     "remote.call('autorio_tasks', 'mine_entity', 'iron-ore')",

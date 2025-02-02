@@ -3,9 +3,11 @@ ignorePaths: []
 dictionaryDefinitions: []
 dictionaries: []
 words:
+  - antfu
   - AUTORIO
   - dotenvx
   - Factorio
+  - factoriotools
   - guiiai
   - LemonNeko
   - LemonNekoGH

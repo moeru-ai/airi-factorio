@@ -13,9 +13,13 @@ import type {
   SurfaceCreateEntity,
 } from 'factorio:runtime'
 
+import type { InventoryItem } from './utils/inventory'
 import { new_task_manager } from './task_manager'
 import { TaskStates } from './types'
+import { get_inventory_items } from './utils/inventory'
 import { distance } from './utils/math'
+
+import './tools'
 
 let setup_complete = false
 
@@ -28,7 +32,7 @@ function log_player_info(player_id: number) {
     name: string
     position: MapPosition
     force: string
-    inventory: { name: string, count: number }[]
+    inventory: InventoryItem[]
     equipment: { name: string, position: EquipmentPosition }[]
     nearby_entities: { name: string, position: MapPosition }[]
     map_info: {
@@ -78,12 +82,7 @@ function log_player_info(player_id: number) {
     },
   }
 
-  const main_inventory = player.get_main_inventory()
-  if (main_inventory) {
-    main_inventory.get_contents().forEach(({ name, count }) => {
-      log_data.inventory.push({ name, count })
-    })
-  }
+  log_data.inventory = get_inventory_items(player_id)
 
   if (player.character?.grid) {
     player.character.grid.equipment.forEach(({ name, position }) => {
