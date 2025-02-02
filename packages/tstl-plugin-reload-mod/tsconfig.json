@@ -13,10 +13,12 @@
     "outDir": "./dist"
   },
   "tstl": {
-    "luaTarget": "JIT"
+    "luaTarget": "JIT",
+    "luaPlugins": [
+      { "name": "./src/auto-reload.ts" }
+    ]
   },
   "include": [
-    "src/**/*.ts",
-    "../tstl-plugin-reload-mod/example/example.ts"
+    "example/*.ts"
   ]
 }

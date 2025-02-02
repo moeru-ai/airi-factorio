@@ -36,6 +36,6 @@ export default antfu({
   },
   files: [
     'packages/autorio/**/*.ts',
-    'packages/chat-bridge/**/*.ts',
+    'packages/tstl-plugin-reload-mod/**/*.ts',
   ],
 })

@@ -1,0 +1,28 @@
+{
+  "name": "@proj-airi/tstl-plugin-reload-mod",
+  "version": "0.1.0",
+  "packageManager": "pnpm@10.1.0",
+  "description": "A plugin for tstl to reload mod.",
+  "author": "LemonNekoGH",
+  "license": "MIT",
+  "keywords": [
+    "factorio",
+    "typescript",
+    "tstl",
+    "lua"
+  ],
+  "scripts": {
+    "build": "tstl",
+    "dev": "mkdir -p dist && cp -r info.json dist && tstl --watch",
+    "typecheck": "tstl --noEmit"
+  },
+  "devDependencies": {
+    "@antfu/eslint-config": "^4.1.1",
+    "eslint": "^9.19.0",
+    "lua-types": "^2.13.1",
+    "ts-node": "^10.9.2",
+    "typed-factorio": "^3.13.1",
+    "typescript": "^5.7.3",
+    "typescript-to-lua": "^1.30.0"
+  }
+}
