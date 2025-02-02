@@ -7,7 +7,17 @@
   "customizations": {
     "vscode": {
       "extensions": [
-        "dbaeumer.vscode-eslint"
+        "streetsidesoftware.code-spell-checker",
+        "mikestead.dotenv",
+        "EditorConfig.EditorConfig",
+        "usernamehw.errorlens",
+        "dbaeumer.vscode-eslint",
+        "yzhang.markdown-all-in-one",
+        "vitest.explorer",
+        "redhat.vscode-yaml",
+        "sumneko.lua",
+        "yinfei.luahelper",
+        "ms-azuretools.vscode-docker"
       ]
     }
   }

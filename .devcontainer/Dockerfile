@@ -1,5 +1,5 @@
 # Factorio does not have stable support for arm64
-FROM --platform=linux/amd64 factoriotools/factorio:2.0.30
+FROM factoriotools/factorio:2.0.30
 
 ARG PNPM_VERSION=10.1.0
 ENV PNPM_VERSION=${PNPM_VERSION:-10.1.0}
