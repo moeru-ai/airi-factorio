@@ -88,6 +88,37 @@ importers:
         specifier: ^1.30.0
         version: 1.30.0(typescript@5.7.3)
 
+  packages/tstl-plugin-reload-factorio-mod:
+    dependencies:
+      '@guiiai/logg':
+        specifier: ^1.0.7
+        version: 1.0.7
+      factorio-rcon-api-client:
+        specifier: ^2.0.4
+        version: 2.0.4
+      typescript-to-lua:
+        specifier: ^1.30.0
+        version: 1.30.0(typescript@5.7.3)
+    devDependencies:
+      '@antfu/eslint-config':
+        specifier: ^4.1.1
+        version: 4.1.1(@typescript-eslint/utils@8.22.0(eslint@9.19.0(jiti@2.4.2))(typescript@5.7.3))(@vue/compiler-sfc@3.5.13)(eslint@9.19.0(jiti@2.4.2))(typescript@5.7.3)(vitest@3.0.4(@types/debug@4.1.12)(@types/node@22.13.0)(jiti@2.4.2)(tsx@4.19.2)(yaml@2.7.0))
+      '@types/node':
+        specifier: ^22.13.0
+        version: 22.13.0
+      eslint:
+        specifier: ^9.19.0
+        version: 9.19.0(jiti@2.4.2)
+      lua-types:
+        specifier: ^2.13.1
+        version: 2.13.1
+      typed-factorio:
+        specifier: ^3.13.1
+        version: 3.13.1(lua-types@2.13.1)(typescript-to-lua@1.30.0(typescript@5.7.3))
+      typescript:
+        specifier: ^5.7.3
+        version: 5.7.3
+
 packages:
 
   '@ampproject/remapping@2.3.0':

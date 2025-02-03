@@ -3,7 +3,6 @@
   "compilerOptions": {
     "target": "ESNext",
     "lib": ["ESNext"],
-    "rootDir": "./src",
     "moduleResolution": "Node",
     "types": [
       "typed-factorio/runtime",
@@ -13,10 +12,11 @@
     "outDir": "./dist"
   },
   "tstl": {
-    "luaTarget": "JIT"
-  },
-  "include": [
-    "src/**/*.ts",
-    "../tstl-plugin-reload-mod/example/example.ts"
-  ]
+    "luaTarget": "JIT",
+    "luaPlugins": [
+      { "name": "../dist/index.js" }
+    ],
+    "luaLibImport": "inline",
+    "buildMode": "default"
+  }
 }
