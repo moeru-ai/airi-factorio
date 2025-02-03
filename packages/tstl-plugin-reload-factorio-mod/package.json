@@ -1,0 +1,34 @@
+{
+  "name": "@proj-airi/tstl-plugin-reload-factorio-mod",
+  "version": "0.1.0",
+  "packageManager": "pnpm@10.1.0",
+  "description": "A plugin for tstl to reload factorio mod.",
+  "author": "LemonNekoGH",
+  "license": "MIT",
+  "keywords": [
+    "factorio",
+    "typescript",
+    "tstl",
+    "lua"
+  ],
+  "scripts": {
+    "example:copy-manifest": "mkdir -p example/dist && cp -r example/info.json example/dist",
+    "example:dev": "pnpm run build && pnpm run example:copy-manifest && tstl -p ./example/tsconfig.json --watch",
+    "example:build": "pnpm run build && pnpm run example:copy-manifest && tstl -p ./example/tsconfig.json",
+    "build": "tsc -p ./tsconfig.json",
+    "typecheck": "tsc -p ./tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "typescript-to-lua": "^1.30.0",
+    "@guiiai/logg": "^1.0.7",
+    "factorio-rcon-api-client": "^2.0.4"
+  },
+  "devDependencies": {
+    "@antfu/eslint-config": "^4.1.1",
+    "@types/node": "^22.13.0",
+    "eslint": "^9.19.0",
+    "lua-types": "^2.13.1",
+    "typed-factorio": "^3.13.1",
+    "typescript": "^5.7.3"
+  }
+}
