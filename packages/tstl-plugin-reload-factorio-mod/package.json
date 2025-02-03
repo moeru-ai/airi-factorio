@@ -19,9 +19,9 @@
     "typecheck": "tsc -p ./tsconfig.json --noEmit"
   },
   "dependencies": {
-    "typescript-to-lua": "^1.30.0",
     "@guiiai/logg": "^1.0.7",
-    "factorio-rcon-api-client": "^2.0.4"
+    "factorio-rcon-api-client": "^2.0.4",
+    "typescript-to-lua": "^1.30.0"
   },
   "devDependencies": {
     "@antfu/eslint-config": "^4.1.1",
