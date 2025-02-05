@@ -17,6 +17,10 @@
       { "name": "../dist/index.js" }
     ],
     "luaLibImport": "inline",
-    "buildMode": "default"
-  }
+    "luaBundle": "control.lua",
+    "luaBundleEntry": "./control.ts"
+  },
+  "include": [
+    "**/*.ts"
+  ]
 }

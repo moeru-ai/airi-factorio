@@ -2,6 +2,22 @@
 
 Hot reload Factorio mod during development.
 
+## Multiple Files
+
+If your mod has multiple files, you need to add the following changes to your `tsconfig.json`.
+
+```json5
+{
+  "tstl": {
+    "luaLibImport": "inline",
+    "luaBundle": "control.lua",
+    "luaBundleEntry": "./control.ts"
+  }
+}
+```
+
+This will bundle all the files into a single file, to help the plugin to reload the mod, because `require` is not supported outside the `control.lua` when we use `load` to reload the mod.
+
 ## Development
 
 Build the example mod, it will also build the plugin.

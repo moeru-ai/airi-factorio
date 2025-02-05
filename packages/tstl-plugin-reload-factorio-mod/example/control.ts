@@ -1,5 +1,7 @@
 import type { EventId } from 'factorio:runtime'
 
+import { add } from './example-dependency'
+
 if (!mods_globals) {
   mods_globals = {}
 }
@@ -69,9 +71,9 @@ if (!mods_globals.example) {
 }
 
 mods_globals.example.add_remote_interface('example_mod_test', {
-  test: () => {
-    log('test 1')
+  add: (a: number, b: number) => {
+    log(`Result: ${add(a, b)}`)
   },
 })
 
-log('mod reloaded, 2')
+log('mod loaded')
