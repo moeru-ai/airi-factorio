@@ -14,7 +14,7 @@
   "tstl": {
     "luaTarget": "JIT",
     "luaPlugins": [
-      { "name": "../dist/index.js" }
+      { "name": "../dist/index.mjs" }
     ],
     "luaLibImport": "inline",
     "luaBundle": "control.lua",

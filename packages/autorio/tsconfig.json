@@ -13,10 +13,16 @@
     "outDir": "./dist"
   },
   "tstl": {
-    "luaTarget": "JIT"
+    "luaTarget": "JIT",
+    "buildMode": "default",
+    "luaLibImport": "inline",
+    "luaBundle": "control.lua",
+    "luaBundleEntry": "src/control.ts",
+    "luaPlugins": [
+      { "name": "@proj-airi/tstl-plugin-reload-factorio-mod/dist/index.mjs" }
+    ]
   },
   "include": [
-    "src/**/*.ts",
-    "../tstl-plugin-reload-mod/example/example.ts"
+    "src/**/*.ts"
   ]
 }

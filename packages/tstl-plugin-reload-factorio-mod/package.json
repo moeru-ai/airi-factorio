@@ -15,7 +15,7 @@
     "example:copy-manifest": "mkdir -p example/dist && cp -r example/info.json example/dist",
     "example:dev": "pnpm run build && pnpm run example:copy-manifest && tstl -p ./example/tsconfig.json --watch",
     "example:build": "pnpm run build && pnpm run example:copy-manifest && tstl -p ./example/tsconfig.json",
-    "build": "tsc -p ./tsconfig.json",
+    "build": "unbuild",
     "typecheck": "tsc -p ./tsconfig.json --noEmit"
   },
   "dependencies": {
@@ -29,6 +29,7 @@
     "eslint": "^9.19.0",
     "lua-types": "^2.13.1",
     "typed-factorio": "^3.13.1",
-    "typescript": "^5.7.3"
+    "typescript": "^5.7.3",
+    "unbuild": "^3.3.1"
   }
 }

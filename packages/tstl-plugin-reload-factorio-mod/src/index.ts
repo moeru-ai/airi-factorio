@@ -5,6 +5,7 @@ import { client, v2FactorioConsoleCommandRawPost } from 'factorio-rcon-api-clien
 
 const rconApiServerHost = env.RCON_API_SERVER_HOST
 const rconApiServerPort = env.RCON_API_SERVER_PORT
+const modName = env.FACTORIO_MOD_NAME
 
 client.setConfig({
   baseUrl: `http://${rconApiServerHost}:${rconApiServerPort}`,
@@ -13,42 +14,52 @@ client.setConfig({
 setGlobalFormat(Format.Pretty)
 const logger = useLogg('tstl-plugin-reload-factorio-mod').useGlobalConfig()
 
-async function reloadMod(result: tstl.EmitFile[]) {
-  if (!rconApiServerHost) {
-    logger.warn('RCON_API_SERVER_HOST is not set, plugin will not work')
-    return
-  }
-
-  const example = result.find(file => file.outputPath.endsWith('control.lua'))
-  if (!example) {
-    logger.warn('example control.ts not found')
+async function reloadMod(result: tstl.EmitFile[], modName: string) {
+  const mod = result.find(file => file.outputPath.endsWith('control.lua'))
+  if (!mod) {
+    logger.warn(`${modName} control.ts not found`)
     return
   }
 
   await v2FactorioConsoleCommandRawPost({
     body: {
-      input: `/c remote.call('example_mod', 'before_reload')`,
+      input: `/c remote.call('${modName}_hot_reload', 'before_reload')`,
     },
   })
 
-  for (const line of example.code.split('\n')) {
+  for (const line of mod.code.split('\n')) {
     await v2FactorioConsoleCommandRawPost({
       body: {
-        input: `/c remote.call('example_mod', 'append_code_to_reload', '${line}')`,
+        input: `/c remote.call('${modName}_hot_reload', 'append_code_to_reload', '${line}')`,
       },
     })
   }
 
   await v2FactorioConsoleCommandRawPost({
     body: {
-      input: `/c remote.call('example_mod', 'reload_code')`,
+      input: `/c remote.call('${modName}_hot_reload', 'reload_code')`,
     },
   })
 }
 
 const plugin: tstl.Plugin = {
   afterEmit: (_1, _2, _3, result) => {
-    reloadMod(result).then(() => {
+    if (!rconApiServerHost) {
+      logger.warn('RCON_API_SERVER_HOST is not set, plugin will not work')
+      return
+    }
+
+    if (!rconApiServerPort) {
+      logger.warn('RCON_API_SERVER_PORT is not set, plugin will not work')
+      return
+    }
+
+    if (!modName) {
+      logger.warn('FACTORIO_MOD_NAME is not set, plugin will not work')
+      return
+    }
+
+    reloadMod(result, modName).then(() => {
       logger.log('reload mod success')
     }).catch((err) => {
       logger.withFields({ err }).error('reload mod error')
