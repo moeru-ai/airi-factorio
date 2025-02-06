@@ -40,4 +40,4 @@ jobs:
         run: pnpm install
 
       - name: Typecheck
-        run: pnpm run typecheck
+        run: pnpm run build && pnpm run typecheck

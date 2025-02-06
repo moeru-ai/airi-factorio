@@ -2,6 +2,27 @@
 
 Hot reload Factorio mod during development.
 
+## Usage
+
+Add the following changes to your `tsconfig.json`.
+
+```json5
+{
+  "compilerOptions": {
+    "tstl": {
+      "luaLibImport": "inline",
+      "luaBundle": "control.lua",
+      "luaBundleEntry": "./control.ts",
+      "buildMode": "default"
+    }
+  }
+}
+```
+
+This will bundle all the files into a single file, to help the plugin to reload the mod, because `require` is not supported outside the `control.lua` when we use `load` to reload the mod.
+
+Set
+
 ## Development
 
 Build the example mod, it will also build the plugin.
@@ -53,3 +74,7 @@ Now you can modify the example mod and see the changes immediately. When the mod
 ```
 
 After you change the plugin code, you need to stop the `tstl` process and run it again.
+
+## TODO
+
+- [ ] Use `rcon-ts` to replace `factorio-rcon-api-client` for less dependencies.

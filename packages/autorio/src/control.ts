@@ -14,12 +14,14 @@ import type {
 } from 'factorio:runtime'
 
 import type { InventoryItem } from './utils/inventory'
+import { hot_reloader } from './hot_reload'
 import { new_task_manager } from './task_manager'
+import { create_tools_remote_interface } from './tools'
 import { TaskStates } from './types'
 import { get_inventory_items } from './utils/inventory'
 import { distance } from './utils/math'
 
-import './tools'
+create_tools_remote_interface()
 
 let setup_complete = false
 
@@ -124,7 +126,7 @@ function log_player_info(player_id: number) {
   log(`[AUTORIO] Player ${player.name} info: ${serpent.block(log_data)}`)
 }
 
-remote.add_interface('autorio_tasks', {
+hot_reloader.add_remote_interface('autorio_tasks', {
   walk_to_entity: (entity_name: string, search_radius: number) => {
     log(`[AUTORIO] New walk_to_entity task: ${entity_name}, radius: ${search_radius}`)
     task_manager.add_task({
@@ -307,9 +309,9 @@ function start_mining(player: LuaPlayer, entity_position: MapPositionStruct) {
 
 // FIXME: who are changing the selected entity while mining?
 // This only happens in multiplayer, why?
-script.on_event(defines.events.on_selected_entity_changed, (unused_event: OnSelectedEntityChangedEvent) => {})
+hot_reloader.add_event_listener(defines.events.on_selected_entity_changed, (unused_event: OnSelectedEntityChangedEvent) => {})
 
-script.on_event(defines.events.on_script_path_request_finished, (event: OnScriptPathRequestFinishedEvent) => {
+hot_reloader.add_event_listener(defines.events.on_script_path_request_finished, (event: OnScriptPathRequestFinishedEvent) => {
   if (task_manager.player_state.task_state !== TaskStates.WALKING_TO_ENTITY) {
     log('[AUTORIO] Not walking to entity, ignoring path request')
     return
@@ -338,7 +340,7 @@ script.on_event(defines.events.on_script_path_request_finished, (event: OnScript
   log(`[AUTORIO] Path calculation completed. Path length: ${event.path}`)
 })
 
-script.on_event(defines.events.on_player_mined_entity, (unused_event: OnPlayerMinedEntityEvent) => {
+hot_reloader.add_event_listener(defines.events.on_player_mined_entity, (unused_event: OnPlayerMinedEntityEvent) => {
   if (task_manager.player_state.task_state !== TaskStates.MINING) {
     return
   }
@@ -852,7 +854,7 @@ function state_walking_direct(player: LuaPlayer) {
 
 let no_player_found = false
 
-script.on_event(defines.events.on_tick, (unused_event) => {
+hot_reloader.add_event_listener(defines.events.on_tick, (unused_event) => {
   if (!setup_complete) {
     setup()
   }
@@ -893,7 +895,7 @@ script.on_event(defines.events.on_tick, (unused_event) => {
   }
 })
 
-script.on_event(defines.events.on_player_crafted_item, (event: OnPlayerCraftedItemEvent) => {
+hot_reloader.add_event_listener(defines.events.on_player_crafted_item, (event: OnPlayerCraftedItemEvent) => {
   // compact for lua array index
   log(`[AUTORIO] Player ${game.connected_players[event.player_index - 1].name} crafted item: ${event.item_stack.name}`) // TODO: determine player index
 
@@ -915,3 +917,5 @@ script.on_event(defines.events.on_player_crafted_item, (event: OnPlayerCraftedIt
     task_manager.next_task()
   }
 })
+
+log('[AUTORIO] Mod loaded 1')

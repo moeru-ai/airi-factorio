@@ -1,5 +1,7 @@
 import type { EventId } from 'factorio:runtime'
 
+import { add } from './example-dependency'
+
 if (!mods_globals) {
   mods_globals = {}
 }
@@ -11,7 +13,7 @@ if (!mods_globals.example) {
     add_remote_interface: (name: string, i: Record<string, (...args: any) => any>) => {
       mods_globals.example.remote_interfaces.push(name)
       remote.add_interface(name, i)
-      log(`add_remote_interface${name}`)
+      log(`add_remote_interface ${name}`)
     },
     add_event_listener: (event: EventId<any>, callback: (...args: any) => any) => {
       if (!mods_globals.example.event_listeners[event]) {
@@ -39,7 +41,7 @@ if (!mods_globals.example) {
     new_code_to_reload: '',
   }
 
-  remote.add_interface('example_mod', {
+  remote.add_interface('example_hot_reload', {
     before_reload: () => {
       mods_globals.example.before_reload()
     },
@@ -69,9 +71,9 @@ if (!mods_globals.example) {
 }
 
 mods_globals.example.add_remote_interface('example_mod_test', {
-  test: () => {
-    log('test 1')
+  add: (a: number, b: number) => {
+    log(`Result: ${add(a, b)}`)
   },
 })
 
-log('mod reloaded, 2')
+log('mod loaded 1')
