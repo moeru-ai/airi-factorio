@@ -2,7 +2,6 @@
 
 Helper for アイリ to play Factorio with you.
 
-
 > [!NOTE]
 >
 > This project is part of the [Project アイリ (Airi)](https://github.com/moeru-ai/airi), we aim to build a LLM-driven VTuber like [Neuro-sama](https://www.youtube.com/@Neurosama) (subscribe if you didn't!) if you are interested in, please do give it a try on [live demo](https://airi.moeru.ai).
