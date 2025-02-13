@@ -13,7 +13,7 @@ export function create_hot_reloader(mod_name: string, before_reload: () => void)
       event_listeners: {},
       add_remote_interface: (name: string, i: Record<string, (...args: any) => any>) => {
         mods_globals![mod_name].remote_interfaces.push(name)
-        remote.add_interface(name, i)
+        remote.add_interface(name, i) // why this registered interface but cannot pass arguments when calling?
         log(`add_remote_interface ${name}`)
       },
       add_event_listener: (event: EventId<any>, callback: (...args: any) => any) => {
