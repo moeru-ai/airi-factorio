@@ -1,4 +1,4 @@
-import type { FactorioConfig, OpenAIConfig, RconAPIClientConfig } from './types.js'
+import type { FactorioRconAPIClientConfig, FactorioWsConfig, OpenAIConfig } from './types.js'
 import { env } from 'node:process'
 import { useLogg } from '@guiiai/logg'
 
@@ -9,17 +9,14 @@ export const openaiConfig: OpenAIConfig = {
   baseUrl: '',
 }
 
-export const factorioConfig: FactorioConfig = {
-  path: '',
-  savePath: '',
-  rconPassword: '',
-  rconPort: 0,
-  rconServerHost: '',
-}
-
-export const rconClientConfig: RconAPIClientConfig = {
+export const rconClientConfig: FactorioRconAPIClientConfig = {
   host: '',
   port: 0,
+}
+
+export const wsClientConfig: FactorioWsConfig = {
+  wsHost: '',
+  wsPort: 0,
 }
 
 export function initEnv() {
@@ -28,14 +25,11 @@ export function initEnv() {
   openaiConfig.apiKey = env.OPENAI_API_KEY || ''
   openaiConfig.baseUrl = env.OPENAI_API_BASEURL || ''
 
-  factorioConfig.path = env.FACTORIO_PATH || ''
-  factorioConfig.savePath = env.FACTORIO_SAVE_PATH || ''
-  factorioConfig.rconPassword = env.FACTORIO_RCON_PASSWORD || ''
-  factorioConfig.rconPort = Number.parseInt(env.FACTORIO_RCON_PORT || '27015')
-  factorioConfig.rconServerHost = env.FACTORIO_RCON_SERVER_HOST || 'localhost'
-
   rconClientConfig.host = env.RCON_API_SERVER_HOST || 'localhost'
   rconClientConfig.port = Number.parseInt(env.RCON_API_SERVER_PORT || '24180')
+
+  wsClientConfig.wsHost = env.FACTORIO_WS_HOST || 'localhost'
+  wsClientConfig.wsPort = Number.parseInt(env.FACTORIO_WS_PORT || '8080')
 
   logger.withFields({ openaiConfig }).log('Environment variables initialized')
 }

@@ -1,13 +1,12 @@
-import type { ResultPromise } from 'execa'
 import type { MessageHandler } from './llm/message-handler'
 import type { StdoutMessage } from './parser'
-import { arch } from 'node:os'
+import { Buffer } from 'node:buffer'
 import { Format, setGlobalFormat, useLogg } from '@guiiai/logg'
-
-import { execa } from 'execa'
 import { client, v2FactorioConsoleCommandMessagePost, v2FactorioConsoleCommandRawPost } from 'factorio-rcon-api-client'
-import { factorioConfig, initEnv, rconClientConfig } from './config'
+import { connect } from 'it-ws'
+import { initEnv, rconClientConfig, wsClientConfig } from './config'
 import { createMessageHandler } from './llm/message-handler'
+
 import { parseChatMessage, parseModErrorMessage, parseTaskCompletedMessage } from './parser'
 
 setGlobalFormat(Format.Pretty)
@@ -45,42 +44,16 @@ async function main() {
     baseUrl: `http://${rconClientConfig.host}:${rconClientConfig.port}`,
   })
 
+  const ws = connect(`ws://${wsClientConfig.wsHost}:${wsClientConfig.wsPort}`)
+
   const gameLogger = useLogg('game').useGlobalConfig()
-
-  // TODO: create a http server to receive mod change signal and restart factorio
-  let factorioInst: ResultPromise<{
-    stdout: ('pipe' | 'inherit')[]
-  }>
-
-  if (arch() === 'arm64') {
-    factorioInst = execa('/bin/box64', [
-      factorioConfig.path,
-      '--start-server',
-      factorioConfig.savePath,
-      '--rcon-password',
-      factorioConfig.rconPassword,
-      '--rcon-port',
-      factorioConfig.rconPort.toString(),
-    ], {
-      stdout: ['pipe', 'inherit'],
-    })
-  }
-  else {
-    factorioInst = execa(factorioConfig.path, [
-      '--start-server',
-      factorioConfig.savePath,
-      '--rcon-password',
-      factorioConfig.rconPassword,
-      '--rcon-port',
-      factorioConfig.rconPort.toString(),
-    ], {
-      stdout: ['pipe', 'inherit'],
-    })
-  }
 
   const messageHandler = await createMessageHandler()
 
-  for await (const line of factorioInst.iterable()) {
+  for await (const buffer of ws.source) {
+    const line = Buffer.from(buffer).toString('utf-8')
+    gameLogger.withContext('game').log(line)
+
     const chatMessage = parseChatMessage(line)
     if (chatMessage) {
       if (chatMessage.isServer) {

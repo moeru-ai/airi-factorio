@@ -26,6 +26,7 @@
     "@xsai/providers": "^0.1.0-beta.5",
     "execa": "^9.5.2",
     "factorio-rcon-api-client": "^2.0.4",
+    "it-ws": "^6.1.5",
     "neuri": "^0.0.22",
     "zod": "^3.24.2",
     "zod-to-json-schema": "^3.24.1"
