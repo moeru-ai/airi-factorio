@@ -40,6 +40,7 @@ export function new_task_manager() {
     if (!task) {
       player_state.task_state = TaskStates.IDLE
       game.print('[AUTORIO] All tasks completed')
+      log('[AUTORIO] All tasks completed')
       return
     }
 
@@ -80,11 +81,22 @@ export function new_task_manager() {
     return task_queue.length === 0
   }
 
+  function cancel_task() {
+    reset_task_state()
+  }
+
+  function cancel_all_tasks() {
+    reset_task_state()
+    task_queue.length = 0 // can use this to clear the array in lua
+  }
+
   return {
     player_state,
     add_task,
     next_task,
     is_task_queue_empty,
     reset_task_state,
+    cancel_task,
+    cancel_all_tasks,
   }
 }

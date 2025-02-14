@@ -24,3 +24,7 @@ remote.call("autorio_tasks", "auto_insert_nearby", "iron-ore", "stone-furnace", 
 ```
 
 <!-- ## Game compatibility -->
+
+## TODO
+
+- [ ] Suspend task on error

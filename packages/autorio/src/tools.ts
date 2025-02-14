@@ -1,8 +1,7 @@
-import { hot_reloader } from './hot_reload'
 import { get_inventory_items } from './utils/inventory'
 
 export function create_tools_remote_interface() {
-  hot_reloader.add_remote_interface('autorio_tools', {
+  remote.add_interface('autorio_tools', {
     get_inventory_items: (player_id: number) => {
       rcon.print(serpent.block(get_inventory_items(player_id)))
       return true

@@ -1,7 +1,8 @@
-import type { DefinedTool, Message } from 'neuri/openai'
+import type { ChatCompletion, DefinedTool, Message } from 'neuri/openai'
 
+import type { StdoutMessage } from '../parser'
 import { createLogg } from '@guiiai/logg'
-import { composeAgent, defineToolFunction, toolFunction } from 'neuri/openai'
+import { composeAgent, defineToolFunction, system, toolFunction, user } from 'neuri/openai'
 import { openaiConfig } from '../config'
 import { parseLLMMessage } from '../parser'
 import { prompt } from './prompt'
@@ -9,18 +10,14 @@ import { tools } from './tools'
 
 const logger = createLogg('agent').useGlobalConfig()
 
-let agent: ReturnType<typeof composeAgent>['call'] | null = null
-
-async function initAgent() {
-  logger.debug('Initializing neuri agent')
-
+export async function createMessageHandler() {
   const toolFunctions: DefinedTool<any, any>[] = []
 
   for (const tool of tools) {
     toolFunctions.push(defineToolFunction(await toolFunction(tool.name, tool.description, tool.schema), tool.fn))
   }
 
-  const { call: callAgent } = composeAgent({
+  const agent = composeAgent({
     provider: {
       model: 'gpt-4o',
       apiKey: openaiConfig.apiKey,
@@ -29,49 +26,55 @@ async function initAgent() {
     tools: toolFunctions,
   })
 
-  return callAgent
+  const messages: Message[] = [system(prompt)]
+
+  async function handleMessage(message: StdoutMessage) {
+    logger.withFields({ message }).debug('Handling message')
+
+    if (message.type === 'chat') {
+      messages.push(user(`[CHAT] ${message.message}`))
+    }
+    else if (message.type === 'modError') {
+      messages.push(user(`[MOD] Error: ${message.error}`))
+    }
+    else if (message.type === 'taskCompleted') {
+      messages.push(user(`[MOD] All tasks completed`))
+    }
+
+    let response: ChatCompletion | undefined
+    try {
+      response = await agent.call(messages, {
+        model: 'gpt-4o',
+        maxRoundTrip: 10,
+      })
+    }
+    catch (error) {
+      logger.withFields({ error }).error('Error calling agent')
+      return null
+    }
+
+    if (!response) {
+      logger.withFields({ response }).error('LLM responded with null')
+      return null
+    }
+
+    if (!response.choices || !response.choices.length) {
+      logger.withFields({ response }).error('LLM responded with no choices')
+      return null
+    }
+
+    const messageFromLLM = response.choices[0].message.content
+    logger.withFields({ messageFromLLM }).debug('Message response from LLM')
+    if (!messageFromLLM) {
+      return null
+    }
+
+    return parseLLMMessage(messageFromLLM) // TODO: handle error and retry
+  }
+
+  return {
+    handleMessage,
+  }
 }
 
-export async function handleMessage(message: string) {
-  if (!agent) {
-    agent = await initAgent()
-  }
-
-  logger.withFields({ message }).debug('Handling message')
-
-  const messages: Message[] = [
-    {
-      role: 'system',
-      content: prompt,
-    },
-    {
-      role: 'user',
-      content: message,
-    },
-  ]
-
-  const response = await agent(messages, {
-    model: 'gpt-4o',
-    maxRoundTrip: 10,
-  })
-
-  if (!response) {
-    return null
-  }
-
-  if (!response.choices || !response.choices.length) {
-    logger.withFields({ response }).error('LLM responded with no choices')
-
-    return null
-  }
-
-  const messageFromLLM = response.choices[0].message.content
-
-  logger.withFields({ messageFromLLM }).debug('Message response from LLM')
-
-  if (!messageFromLLM) {
-    return null
-  }
-
-  return parseLLMMessage(messageFromLLM) // TODO: handle error and retry
-}
+export type MessageHandler = Awaited<ReturnType<typeof createMessageHandler>>
