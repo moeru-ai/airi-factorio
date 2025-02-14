@@ -1,8 +1,8 @@
 # Factorio does not have stable support for arm64
 FROM factoriotools/factorio:2.0.30
 
-ARG PNPM_VERSION=10.1.0
-ENV PNPM_VERSION=${PNPM_VERSION:-10.1.0}
+ARG PNPM_VERSION=10.4.0
+ENV PNPM_VERSION=${PNPM_VERSION:-10.4.0}
 # https://pnpm.io/docker
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
