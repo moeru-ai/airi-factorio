@@ -3,15 +3,12 @@ export interface OpenAIConfig {
   baseUrl: string
 }
 
-export interface FactorioConfig {
-  path: string
-  savePath: string
-  rconPassword: string
-  rconPort: number
-  rconServerHost: string
+export interface FactorioWsConfig {
+  wsPort: number
+  wsHost: string
 }
 
-export interface RconAPIClientConfig {
+export interface FactorioRconAPIClientConfig {
   port: number
   host: string
 }

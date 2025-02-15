@@ -1,15 +1,14 @@
 {
-  "name": "@proj-airi/factorio-agent",
+  "name": "@proj-airi/factorio-wrapper",
   "type": "module",
   "version": "0.1.0",
   "packageManager": "pnpm@10.4.0",
-  "description": "An agent for Factorio written in TypeScript.",
+  "description": "Run factorio server and convert std stream to websocket stream",
   "author": "LemonNekoGH",
   "license": "MIT",
   "keywords": [
     "factorio",
-    "llm",
-    "agent",
+    "websocket",
     "typescript"
   ],
   "scripts": {
@@ -22,17 +21,12 @@
   "dependencies": {
     "@dotenvx/dotenvx": "^1.36.0",
     "@guiiai/logg": "^1.0.7",
-    "@xsai/generate-text": "^0.1.0-beta.5",
-    "@xsai/providers": "^0.1.0-beta.5",
     "execa": "^9.5.2",
-    "factorio-rcon-api-client": "^2.0.4",
-    "it-ws": "^6.1.5",
-    "neuri": "^0.0.22",
-    "zod": "^3.24.2",
-    "zod-to-json-schema": "^3.24.1"
+    "ws": "^8.18.0"
   },
   "devDependencies": {
     "@types/node": "^22.13.4",
+    "@types/ws": "^8.5.14",
     "tsx": "^4.19.2",
     "unbuild": "^3.3.1",
     "vitest": "^3.0.5"
