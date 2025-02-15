@@ -52,7 +52,6 @@ async function main() {
 
   for await (const buffer of ws.source) {
     const line = Buffer.from(buffer).toString('utf-8')
-    gameLogger.withContext('game').log(line)
 
     const chatMessage = parseChatMessage(line)
     if (chatMessage) {

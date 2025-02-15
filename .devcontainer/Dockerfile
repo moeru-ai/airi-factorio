@@ -12,8 +12,8 @@ RUN curl -fsSL https://deb.nodesource.com/setup_22.x | bash -
 RUN apt-get update && apt-get install -y nodejs git file curl ca-certificates
 RUN corepack enable
 
-# install websocketd
-RUN apt-get install -y websocketd
+# install debug tools
+RUN apt-get install -y lsof net-tools iproute2 telnet procps
 
 # install pnpm
 RUN export NPM_PKG_SHA_PNPM=$(npm view pnpm@$PNPM_VERSION dist.shasum) && \

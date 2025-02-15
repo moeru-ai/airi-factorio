@@ -1,0 +1,34 @@
+{
+  "name": "@proj-airi/factorio-wrapper",
+  "type": "module",
+  "version": "0.1.0",
+  "packageManager": "pnpm@10.4.0",
+  "description": "Run factorio server and convert std stream to websocket stream",
+  "author": "LemonNekoGH",
+  "license": "MIT",
+  "keywords": [
+    "factorio",
+    "websocket",
+    "typescript"
+  ],
+  "scripts": {
+    "build": "unbuild",
+    "dev": "dotenvx run -f .env -f .env.local --overload --debug -- tsx src/main.ts",
+    "start": "dotenvx run -f .env -f .env.local --overload -- tsx src/main.ts",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest"
+  },
+  "dependencies": {
+    "@dotenvx/dotenvx": "^1.36.0",
+    "@guiiai/logg": "^1.0.7",
+    "execa": "^9.5.2",
+    "ws": "^8.18.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.4",
+    "@types/ws": "^8.5.14",
+    "tsx": "^4.19.2",
+    "unbuild": "^3.3.1",
+    "vitest": "^3.0.5"
+  }
+}

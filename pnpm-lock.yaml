@@ -97,6 +97,37 @@ importers:
         specifier: ^1.30.1
         version: 1.30.1(typescript@5.7.3)
 
+  packages/factorio-wrapper:
+    dependencies:
+      '@dotenvx/dotenvx':
+        specifier: ^1.36.0
+        version: 1.36.0
+      '@guiiai/logg':
+        specifier: ^1.0.7
+        version: 1.0.7
+      execa:
+        specifier: ^9.5.2
+        version: 9.5.2
+      ws:
+        specifier: ^8.18.0
+        version: 8.18.0
+    devDependencies:
+      '@types/node':
+        specifier: ^22.13.4
+        version: 22.13.4
+      '@types/ws':
+        specifier: ^8.5.14
+        version: 8.5.14
+      tsx:
+        specifier: ^4.19.2
+        version: 4.19.2
+      unbuild:
+        specifier: ^3.3.1
+        version: 3.3.1(typescript@5.7.3)
+      vitest:
+        specifier: ^3.0.5
+        version: 3.0.5(@types/debug@4.1.12)(@types/node@22.13.4)(jiti@2.4.2)(tsx@4.19.2)(yaml@2.7.0)
+
   packages/tstl-plugin-reload-factorio-mod:
     dependencies:
       '@guiiai/logg':
