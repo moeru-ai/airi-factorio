@@ -11,7 +11,7 @@ export enum TaskStates {
   CRAFTING = 'crafting',
   RESEARCHING = 'researching',
   WALKING_DIRECT = 'walking_direct',
-  AUTO_INSERTING = 'auto_inserting',
+  MOVING_ITEMS = 'moving_items',
   ATTACKING = 'attacking',
 }
 
@@ -43,19 +43,12 @@ export interface PlayerParametersPlaceEntity {
   position?: MapPositionStruct
 }
 
-export interface PlayerParametersAutoInsertNearby {
-  type: TaskStates.AUTO_INSERTING
+export interface PlayerParametersMoveItems {
+  type: TaskStates.MOVING_ITEMS
   item_name: string
   entity_name: string
   max_count: number
-}
-
-export interface PlayerParametersPickupItem {
-  type: TaskStates.PICKING_UP
-  item_name: string
-  count: number
-  container_name: string
-  search_radius: number
+  to_entity: boolean // If true, the items will be moved to the entity, otherwise, the items will be moved to the player's inventory
 }
 
 export interface PlayerParametersCraftItem {
@@ -81,8 +74,7 @@ export type PlayerParameters =
   | PlayerParametersWalkingDirect
   | PlayerParametersMineEntity
   | PlayerParametersPlaceEntity
-  | PlayerParametersAutoInsertNearby
-  | PlayerParametersPickupItem
+  | PlayerParametersMoveItems
   | PlayerParametersCraftItem
   | PlayerParametersAttackNearestEnemy
   | PlayerParametersResearchTechnology
@@ -93,8 +85,7 @@ export interface PlayerState {
   parameters_walking_direct?: PlayerParametersWalkingDirect
   parameters_mine_entity?: PlayerParametersMineEntity
   parameters_place_entity?: PlayerParametersPlaceEntity
-  parameters_auto_insert_nearby?: PlayerParametersAutoInsertNearby
-  parameters_pickup_item?: PlayerParametersPickupItem
+  parameters_move_items?: PlayerParametersMoveItems
   parameters_craft_item?: PlayerParametersCraftItem
   parameters_attack_nearest_enemy?: PlayerParametersAttackNearestEnemy
   parameters_research_technology?: PlayerParametersResearchTechnology

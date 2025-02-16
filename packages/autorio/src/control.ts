@@ -4,6 +4,7 @@ import type {
   CollisionMask,
   EquipmentPosition,
   LuaEntity,
+  LuaInventory,
   LuaPlayer,
   OnPlayerCraftedItemEvent,
   OnPlayerMinedEntityEvent,
@@ -161,27 +162,22 @@ remote.add_interface('autorio_tasks', {
     log(`[AUTORIO] New place_entity task: ${entity_name}`)
     return true
   },
-  auto_insert_nearby: (item_name: string, entity_name: string, max_count: number): [boolean, string] => {
+  move_items: (item_name: string, entity_name: string, max_count: number, to_entity: boolean): [boolean, string] => {
     task_manager.add_task({
-      type: TaskStates.AUTO_INSERTING,
+      type: TaskStates.MOVING_ITEMS,
       item_name,
       entity_name,
       max_count: max_count || math.huge,
+      to_entity,
     })
 
-    log(`[AUTORIO] New auto_insert_nearby task for ${item_name} into ${entity_name}`)
-    return [true, 'Task started']
-  },
-  pick_up_item: (item_name: string, container_name: string, count: number): [boolean, string] => {
-    task_manager.add_task({
-      type: TaskStates.PICKING_UP,
-      item_name,
-      count: count || 1,
-      container_name,
-      search_radius: 8,
-    })
+    if (to_entity) {
+      log(`[AUTORIO] New move_items task for ${item_name} from player's inventory to ${entity_name}`)
+    }
+    else {
+      log(`[AUTORIO] New move_items task for ${item_name} from ${entity_name} to player's inventory`)
+    }
 
-    log(`[AUTORIO] New pick_up_item task: ${item_name} x${count} from ${container_name}`)
     return [true, 'Task started']
   },
   craft_item: (item_name: string, count: number = 1): [boolean, string] => {
@@ -636,75 +632,12 @@ function state_placing(player: LuaPlayer) {
   return [false, 'Failed to place entity']
 }
 
-function state_picking_up(player: LuaPlayer) {
-  if (!task_manager.player_state.parameters_pickup_item) {
-    log('[AUTORIO] No parameters found when picking up')
-    return
-  }
-
-  const nearby_containers = player.surface.find_entities_filtered({
-    position: player.position,
-    radius: task_manager.player_state.parameters_pickup_item.search_radius,
-    name: task_manager.player_state.parameters_pickup_item.container_name,
-    force: player.force,
-  })
-
-  const player_inventory = player.get_main_inventory()
-  if (!player_inventory) {
-    log('[AUTORIO] Cannot access player inventory, ending PICKING_UP task')
-    task_manager.reset_task_state()
-    task_manager.next_task()
-    return
-  }
-
-  let picked_up_total = 0
-
-  for (const container of nearby_containers) {
-    const max_index = container.get_max_inventory_index()
-    for (let i = 1; i <= max_index; i++) {
-      const inventory = container.get_inventory(i)
-      if (inventory) { // Check if inventory exists at this index
-        const [item_stack, unused_count] = inventory.find_item_stack(task_manager.player_state.parameters_pickup_item.item_name)
-        if (item_stack) {
-          const to_pick_up = math.min(item_stack.count, task_manager.player_state.parameters_pickup_item.count - picked_up_total)
-          const picked_up = player_inventory.insert({ name: task_manager.player_state.parameters_pickup_item.item_name, count: to_pick_up })
-
-          if (picked_up > 0) {
-            inventory.remove({ name: task_manager.player_state.parameters_pickup_item.item_name, count: picked_up })
-            picked_up_total = picked_up_total + picked_up
-            log(`[AUTORIO] Picked up ${picked_up} ${task_manager.player_state.parameters_pickup_item.item_name} from ${container.name} inventory index ${i}`)
-          }
-
-          if (picked_up_total >= task_manager.player_state.parameters_pickup_item.count) {
-            break
-          }
-        }
-      }
-      if (picked_up_total >= task_manager.player_state.parameters_pickup_item.count) {
-        break
-      }
-    }
-    if (picked_up_total >= task_manager.player_state.parameters_pickup_item.count) {
-      break
-    }
-  }
-
-  if (picked_up_total === 0) {
-    log('[AUTORIO] No items picked up, ending task')
-  }
-  else {
-    log(`[AUTORIO] Picked up a total of ${picked_up_total} ${task_manager.player_state.parameters_pickup_item.item_name}`)
-  }
-
-  task_manager.reset_task_state()
-  task_manager.next_task()
-}
-
-function state_auto_inserting(player: LuaPlayer) {
-  const parameters = task_manager.player_state.parameters_auto_insert_nearby
+// TODO: Move items between specified entity and player inventory, give the entity name and position as parameters
+function state_moving_items(player: LuaPlayer) {
+  const parameters = task_manager.player_state.parameters_move_items
 
   if (!parameters) {
-    log('[AUTORIO] No parameters found when auto inserting')
+    log('[AUTORIO] No parameters found when moving items')
     return
   }
 
@@ -717,60 +650,102 @@ function state_auto_inserting(player: LuaPlayer) {
 
   const player_inventory = player.get_main_inventory()
   if (!player_inventory) {
-    log('[AUTORIO] Cannot access player inventory, ending AUTO_INSERTING task')
+    log('[AUTORIO] Cannot access player inventory, ending MOVING_ITEMS task')
     task_manager.reset_task_state()
     task_manager.next_task()
     return
   }
 
-  const [item_stack, unused_count] = player_inventory.find_item_stack(parameters.item_name)
-  let inserted_total = 0
+  let moved_total = 0
 
-  if (!item_stack) {
-    return
-  }
-
-  for (const entity of nearby_entities) {
-    const max_index = entity.get_max_inventory_index()
-    if (!entity.can_insert({ name: parameters.item_name })) {
-      continue
+  if (parameters.to_entity) {
+    const [item_stack, unused_count] = player_inventory.find_item_stack(parameters.item_name)
+    if (!item_stack) {
+      return
     }
 
-    for (let i = 1; i <= max_index; i++) {
-      const item_name = parameters.item_name
-      const inventory = entity.get_inventory(i)
-      if (inventory && inventory.can_insert({ name: item_name })) {
-        const to_insert = math.min(item_stack.count, parameters.max_count - inserted_total)
-        log(`[AUTORIO] Item stack: ${serpent.line(item_stack)}`)
-        if (to_insert <= 0) {
-          continue
+    nearby_entities
+      .filter(it => it.can_insert({ name: parameters.item_name }))
+      .map((entity) => {
+        const max_index = entity.get_max_inventory_index()
+        const inventories: LuaInventory[] = []
+        for (let i = 1; i <= max_index; i++) {
+          const inventory = entity.get_inventory(i)
+          if (inventory && inventory.can_insert({ name: parameters.item_name })) {
+            inventories.push(inventory)
+          }
         }
 
-        log(`[AUTORIO] Inserting ${to_insert} ${item_name} into ${entity.name} inventory index ${i}`)
-        const inserted = inventory.insert({ name: item_name, count: to_insert })
-        if (inserted > 0) {
-          player_inventory.remove({ name: item_name, count: inserted })
-          inserted_total = inserted_total + inserted
-          log(`[AUTORIO] Inserted ${inserted} ${item_name} into ${entity.name} inventory index ${i}`)
+        return inventories
+      })
+      .flat()
+      .forEach((inventory) => {
+        if (moved_total >= parameters.max_count) {
+          return
         }
-        if (inserted_total >= parameters.max_count) {
-          break
-        }
-      }
-      if (inserted_total >= parameters.max_count) {
-        break
-      }
-    }
-    if (inserted_total >= parameters.max_count) {
-      break
-    }
-  }
 
-  if (inserted_total === 0) {
-    log('[AUTORIO] No items inserted, ending task')
+        const to_move = math.min(item_stack.count, parameters.max_count - moved_total)
+        if (to_move <= 0) {
+          return
+        }
+
+        log(`[AUTORIO] Moving ${to_move} ${parameters.item_name} to ${inventory.entity_owner?.name} inventory index ${inventory.index}`)
+        const moved = inventory.insert({ name: parameters.item_name, count: to_move })
+        if (moved > 0) {
+          player_inventory.remove({ name: parameters.item_name, count: moved })
+          moved_total += moved
+
+          log(`[AUTORIO] Moved ${moved} ${parameters.item_name} to ${inventory.entity_owner?.name} inventory index ${inventory.index}`)
+        }
+      })
   }
   else {
-    log(`[AUTORIO] Inserted a total of ${inserted_total} ${parameters.item_name}`)
+    nearby_entities
+      .map((entity) => {
+        const max_index = entity.get_max_inventory_index()
+        const inventories: LuaInventory[] = []
+        for (let i = 1; i <= max_index; i++) {
+          const inventory = entity.get_inventory(i)
+          if (!inventory) {
+            continue
+          }
+          inventories.push(inventory)
+        }
+
+        return inventories
+      })
+      .flat()
+      .forEach((inventory) => {
+        if (!player_inventory.can_insert({ name: parameters.item_name })) {
+          log(`[AUTORIO] Cannot insert ${parameters.item_name} into player inventory, skipping`)
+          return
+        }
+
+        const removed = inventory.remove({ name: parameters.item_name, count: parameters.max_count - moved_total })
+        if (removed <= 0) {
+          return
+        }
+
+        const inserted = player_inventory.insert({ name: parameters.item_name, count: removed })
+        if (inserted < removed) {
+          // move back the remaining items
+          inventory.insert({ name: parameters.item_name, count: removed - inserted })
+          moved_total += inserted
+        }
+        else {
+          moved_total += removed
+        }
+
+        moved_total += removed
+        log(`[AUTORIO] Moved ${removed} ${parameters.item_name} from ${inventory.entity_owner?.name} inventory index ${inventory.index}`)
+      })
+  }
+
+  if (moved_total === 0) {
+    log('[AUTORIO] No items moved, ending task')
+  }
+  else {
+    log(`[AUTORIO] Moved a total of ${moved_total} ${parameters.item_name}`)
   }
 
   task_manager.reset_task_state()
@@ -890,11 +865,8 @@ script.on_event(defines.events.on_tick, (unused_event) => {
   else if (task_manager.player_state.task_state === TaskStates.PLACING) {
     state_placing(player)
   }
-  else if (task_manager.player_state.task_state === TaskStates.AUTO_INSERTING) {
-    state_auto_inserting(player)
-  }
-  else if (task_manager.player_state.task_state === TaskStates.PICKING_UP) {
-    state_picking_up(player)
+  else if (task_manager.player_state.task_state === TaskStates.MOVING_ITEMS) {
+    state_moving_items(player)
   }
   else if (task_manager.player_state.task_state === TaskStates.RESEARCHING) {
     state_researching(player)

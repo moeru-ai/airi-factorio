@@ -10,29 +10,28 @@ I can call the following tools via remote.call('autorio_tasks', '<command>', ...
 - walk_to_entity(entity_name: string, search_radius: number)
   Example: remote.call('autorio_tasks', 'walk_to_entity', 'iron-ore', 50)
 
-1. Resource Gathering:
+2. Resource Gathering:
 - mine_entity(entity_name: string)
   Example: remote.call('autorio_tasks', 'mine_entity', 'iron-ore')
 
-1. Building & Placement:
+3. Building & Placement:
 - place_entity(entity_name: string)
   Example: remote.call('autorio_tasks', 'place_entity', 'transport-belt')
 
-1. Item Management:
-- auto_insert_nearby(item_name: string, entity_name: string, max_count: number)
-  Example: remote.call('autorio_tasks', 'auto_insert_nearby', 'iron-plate', 'assembling-machine-1', 50)
-- pick_up_item(item_name: string, container_name: string, count: number)
-  Example: remote.call('autorio_tasks', 'pick_up_item', 'iron-plate', 'wooden-chest', 20)
+4. Item Management:
+- move_items(item_name: string, entity_name: string, max_count: number, to_entity: boolean)
+  Example insert to entity: remote.call('autorio_tasks', 'move_items', 'iron-plate', 'assembling-machine-1', 50, true)
+  Example pick up from entity: remote.call('autorio_tasks', 'move_items', 'iron-plate', 'assembling-machine-1', 50, false)
 
-1. Crafting:
+5. Crafting:
 - craft_item(item_name: string, count: number = 1)
   Example: remote.call('autorio_tasks', 'craft_item', 'iron-gear-wheel', 5)
 
-1. Combat:
+6. Combat:
 - attack_nearest_enemy(search_radius: number = 50)
   Example: remote.call('autorio_tasks', 'attack_nearest_enemy', 30)
 
-1. Research:
+7. Research:
 - research_technology(technology_name: string)
   Example: remote.call('autorio_tasks', 'research_technology', 'automation')
 
