@@ -5,7 +5,7 @@ import { createLogg } from '@guiiai/logg'
 import { composeAgent, defineToolFunction, system, toolFunction, user } from 'neuri/openai'
 import { openaiConfig } from '../config'
 import { parseLLMMessage } from '../parser'
-import { prompt } from './prompt'
+import prompt from './prompt.md?raw'
 import { tools } from './tools'
 
 const logger = createLogg('agent').useGlobalConfig()
