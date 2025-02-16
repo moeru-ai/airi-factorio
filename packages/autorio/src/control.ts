@@ -180,6 +180,16 @@ remote.add_interface('autorio_tasks', {
 
     return [true, 'Task started']
   },
+  wait: (ticks: number): [boolean, string] => {
+    task_manager.add_task({
+      type: TaskStates.WAITING,
+      remaining_ticks: ticks,
+    })
+
+    log(`[AUTORIO] New wait task for ${ticks} ticks`)
+
+    return [true, 'Task started']
+  },
   craft_item: (item_name: string, count: number = 1): [boolean, string] => {
     const player = game.connected_players[0]
     if (!player.force.recipes[item_name]) {
@@ -780,7 +790,7 @@ function check_can_craft(player: LuaPlayer, item_name: string, count: number) {
   }
 
   if (not_enough_ingredients.length > 0) {
-    log(`[AUTORIO] No enough ingredients to craft ${item_name}: ${serpent.line(not_enough_ingredients)}`)
+    log(`[AUTORIO] [ERROR] No enough ingredients to craft ${item_name}: ${serpent.line(not_enough_ingredients)}`)
     return false
   }
 
@@ -836,6 +846,22 @@ function state_walking_direct(player: LuaPlayer) {
   }
 }
 
+function state_waiting() {
+  if (!task_manager.player_state.parameters_waiting) {
+    log('[AUTORIO] No parameters found when waiting')
+    return
+  }
+
+  if (task_manager.player_state.parameters_waiting.remaining_ticks <= 0) {
+    log('[AUTORIO] Waiting task complete')
+    task_manager.reset_task_state()
+    task_manager.next_task()
+    return
+  }
+
+  task_manager.player_state.parameters_waiting.remaining_ticks -= 1
+}
+
 let no_player_found = false
 
 script.on_event(defines.events.on_tick, (unused_event) => {
@@ -873,6 +899,9 @@ script.on_event(defines.events.on_tick, (unused_event) => {
   }
   else if (task_manager.player_state.task_state === TaskStates.WALKING_DIRECT) {
     state_walking_direct(player)
+  }
+  else if (task_manager.player_state.task_state === TaskStates.WAITING) {
+    state_waiting()
   }
 })
 

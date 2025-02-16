@@ -1,4 +1,4 @@
-import type { ChatCompletion, DefinedTool, Message } from 'neuri/openai'
+import type { DefinedTool, Message } from 'neuri/openai'
 
 import type { StdoutMessage } from '../parser'
 import { createLogg } from '@guiiai/logg'
@@ -41,17 +41,10 @@ export async function createMessageHandler() {
       messages.push(user(`[MOD] All tasks completed`))
     }
 
-    let response: ChatCompletion | undefined
-    try {
-      response = await agent.call(messages, {
-        model: 'gpt-4o',
-        maxRoundTrip: 10,
-      })
-    }
-    catch (error) {
-      logger.withFields({ error }).error('Error calling agent')
-      return null
-    }
+    const response = await agent.call(messages, {
+      model: 'gpt-4o',
+      maxRoundTrip: 10,
+    })
 
     if (!response) {
       logger.withFields({ response }).error('LLM responded with null')
@@ -69,7 +62,7 @@ export async function createMessageHandler() {
       return null
     }
 
-    return parseLLMMessage(messageFromLLM) // TODO: handle error and retry
+    return parseLLMMessage(messageFromLLM)
   }
 
   return {

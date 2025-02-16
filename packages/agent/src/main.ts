@@ -2,18 +2,26 @@ import type { MessageHandler } from './llm/message-handler'
 import type { StdoutMessage } from './parser'
 import { Buffer } from 'node:buffer'
 import { Format, setGlobalFormat, useLogg } from '@guiiai/logg'
+import { backOff } from 'exponential-backoff'
 import { client, v2FactorioConsoleCommandMessagePost, v2FactorioConsoleCommandRawPost } from 'factorio-rcon-api-client'
 import { connect } from 'it-ws'
 import { initEnv, rconClientConfig, wsClientConfig } from './config'
 import { createMessageHandler } from './llm/message-handler'
-
 import { parseChatMessage, parseModErrorMessage, parseTaskCompletedMessage } from './parser'
 
 setGlobalFormat(Format.Pretty)
 const logger = useLogg('main').useGlobalConfig()
 
 async function executeCommandFromAgent<T extends StdoutMessage>(message: T, messageHandler: MessageHandler) {
-  const llmResponse = await messageHandler.handleMessage(message)
+  const llmResponse = await backOff(() => messageHandler.handleMessage(message), {
+    timeMultiple: 2,
+    maxDelay: 10000,
+    retry(e, attemptNumber) {
+      logger.withFields({ error: e.message, attemptNumber }).error('Failed to handle message, attempt to retry')
+      return true
+    },
+  })
+
   if (!llmResponse) {
     logger.error('Failed to handle message')
     return

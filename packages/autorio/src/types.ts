@@ -13,6 +13,7 @@ export enum TaskStates {
   WALKING_DIRECT = 'walking_direct',
   MOVING_ITEMS = 'moving_items',
   ATTACKING = 'attacking',
+  WAITING = 'waiting',
 }
 
 export interface PlayerParametersWalkToEntity {
@@ -69,6 +70,11 @@ export interface PlayerParametersResearchTechnology {
   technology_name: string
 }
 
+export interface PlayerParametersWaiting {
+  type: TaskStates.WAITING
+  remaining_ticks: number
+}
+
 export type PlayerParameters =
   | PlayerParametersWalkToEntity
   | PlayerParametersWalkingDirect
@@ -78,6 +84,7 @@ export type PlayerParameters =
   | PlayerParametersCraftItem
   | PlayerParametersAttackNearestEnemy
   | PlayerParametersResearchTechnology
+  | PlayerParametersWaiting
 
 export interface PlayerState {
   task_state: TaskStates
@@ -89,4 +96,5 @@ export interface PlayerState {
   parameters_craft_item?: PlayerParametersCraftItem
   parameters_attack_nearest_enemy?: PlayerParametersAttackNearestEnemy
   parameters_research_technology?: PlayerParametersResearchTechnology
+  parameters_waiting?: PlayerParametersWaiting
 }

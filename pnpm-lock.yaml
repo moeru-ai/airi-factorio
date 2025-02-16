@@ -44,6 +44,9 @@ importers:
       execa:
         specifier: ^9.5.2
         version: 9.5.2
+      exponential-backoff:
+        specifier: ^3.1.2
+        version: 3.1.2
       factorio-rcon-api-client:
         specifier: ^2.0.4
         version: 2.0.4
@@ -1756,6 +1759,9 @@ packages:
   expect-type@1.1.0:
     resolution: {integrity: sha512-bFi65yM+xZgk+u/KRIpekdSYkTB5W1pEf0Lt8Q8Msh7b+eQ7LXVtIB1Bkm4fvclDEL1b2CZkMhv2mOeF8tMdkA==}
     engines: {node: '>=12.0.0'}
+
+  exponential-backoff@3.1.2:
+    resolution: {integrity: sha512-8QxYTVXUkuy7fIIoitQkPwGonB8F3Zj8eEO8Sqg9Zv/bkI7RJAzowee4gr81Hak/dUTpA2Z7VfQgoijjPNlUZA==}
 
   factorio-rcon-api-client@2.0.4:
     resolution: {integrity: sha512-uBQb+vBVt77ihym4Gqhha1eqs1Tk/kHTkeXrJxcBCNCBuIG+2lhbic+mNs2kbVstCvyAn917mluZ34Y7/y3ORg==}
@@ -4803,6 +4809,8 @@ snapshots:
       yoctocolors: 2.1.1
 
   expect-type@1.1.0: {}
+
+  exponential-backoff@3.1.2: {}
 
   factorio-rcon-api-client@2.0.4:
     dependencies:
