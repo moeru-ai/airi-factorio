@@ -23,8 +23,7 @@ export function new_task_manager() {
     player_state.parameters_walking_direct = undefined
     player_state.parameters_mine_entity = undefined
     player_state.parameters_place_entity = undefined
-    player_state.parameters_auto_insert_nearby = undefined
-    player_state.parameters_pickup_item = undefined
+    player_state.parameters_move_items = undefined
     player_state.parameters_craft_item = undefined
     player_state.parameters_attack_nearest_enemy = undefined
     player_state.parameters_research_technology = undefined
@@ -59,11 +58,8 @@ export function new_task_manager() {
       case TaskStates.PLACING:
         player_state.parameters_place_entity = task
         break
-      case TaskStates.AUTO_INSERTING:
-        player_state.parameters_auto_insert_nearby = task
-        break
-      case TaskStates.PICKING_UP:
-        player_state.parameters_pickup_item = task
+      case TaskStates.MOVING_ITEMS:
+        player_state.parameters_move_items = task
         break
       case TaskStates.CRAFTING:
         player_state.parameters_craft_item = task
