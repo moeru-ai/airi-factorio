@@ -143,13 +143,14 @@ remote.add_interface('autorio_operations', {
     return true
   },
 
-  mine_entity: (entity_name: string) => {
+  mine_entity: (entity_name: string, count: number = 1) => {
     task_manager.add_task({
       type: TaskStates.MINING,
       entity_name,
+      count,
     })
 
-    log(`[AUTORIO] New mine_entity task: ${entity_name}`)
+    log(`[AUTORIO] New mine_entity task: ${entity_name} x${count}`)
     return true
   },
   place_entity: (entity_name: string) => {
@@ -354,14 +355,19 @@ script.on_event(defines.events.on_player_mined_entity, (unused_event: OnPlayerMi
     return
   }
 
-  log('[AUTORIO] Entity mined, next task')
-  task_manager.reset_task_state()
-
-  if (task_manager.is_task_queue_empty()) {
+  if (!task_manager.player_state.parameters_mine_entity) {
+    log('[AUTORIO] No parameters found when on_player_mined_entity event')
     return
   }
 
-  task_manager.next_task()
+  if (task_manager.player_state.parameters_mine_entity.count <= 0) {
+    log('[AUTORIO] Count is 0, switching to IDLE state')
+    task_manager.reset_task_state()
+    task_manager.next_task()
+    return
+  }
+
+  task_manager.player_state.parameters_mine_entity.count = task_manager.player_state.parameters_mine_entity.count - 1
 })
 
 function setup() {
@@ -671,6 +677,9 @@ function state_moving_items(player: LuaPlayer) {
   if (parameters.to_entity) {
     const [item_stack, unused_count] = player_inventory.find_item_stack(parameters.item_name)
     if (!item_stack) {
+      log('[AUTORIO] Item not found in player inventory, ending MOVING_ITEMS task')
+      task_manager.reset_task_state()
+      task_manager.next_task()
       return
     }
 
@@ -726,6 +735,10 @@ function state_moving_items(player: LuaPlayer) {
       })
       .flat()
       .forEach((inventory) => {
+        if (moved_total >= parameters.max_count) {
+          return
+        }
+
         if (!player_inventory.can_insert({ name: parameters.item_name })) {
           log(`[AUTORIO] Cannot insert ${parameters.item_name} into player inventory, skipping`)
           return

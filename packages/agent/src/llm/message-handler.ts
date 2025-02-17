@@ -2,7 +2,7 @@ import type { DefinedTool, Message } from 'neuri/openai'
 
 import type { StdoutMessage } from '../parser'
 import { createLogg } from '@guiiai/logg'
-import { composeAgent, defineToolFunction, system, toolFunction, user } from 'neuri/openai'
+import { assistant, composeAgent, defineToolFunction, system, toolFunction, user } from 'neuri/openai'
 import { openaiConfig } from '../config'
 import { parseLLMMessage } from '../parser'
 import prompt from './prompt.md?raw'
@@ -62,7 +62,10 @@ export async function createMessageHandler() {
       return null
     }
 
-    return parseLLMMessage(messageFromLLM)
+    const parsedMessage = parseLLMMessage(messageFromLLM)
+    messages.push(assistant(`${JSON.stringify(parsedMessage)}`))
+
+    return parsedMessage
   }
 
   return {

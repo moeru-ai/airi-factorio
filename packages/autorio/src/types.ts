@@ -35,6 +35,7 @@ export interface PlayerParametersWalkingDirect {
 export interface PlayerParametersMineEntity {
   type: TaskStates.MINING
   entity_name: string
+  count: number
   position?: MapPositionStruct
 }
 

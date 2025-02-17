@@ -30,6 +30,8 @@ export type StdoutMessage = ChatMessage | CommandMessage | ModErrorMessage | Ope
 export interface LLMMessage {
   chatMessage: string
   operationCommands: string[]
+  plan: string[]
+  currentStep: number
 }
 
 export function parseLLMMessage(message: string): LLMMessage {

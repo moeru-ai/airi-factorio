@@ -37,6 +37,8 @@ async function executeCommandFromAgent<T extends StdoutMessage>(message: T, mess
     return
   }
 
+  logger.withFields({ operationCommands: llmResponse.operationCommands, currentStep: llmResponse.currentStep }).debug('Executing operation commands')
+
   const command = llmResponse.operationCommands.join(';')
   await v2FactorioConsoleCommandRawPost({
     body: {
