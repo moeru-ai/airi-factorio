@@ -39,8 +39,8 @@ export function new_task_manager() {
     const task = task_queue.shift()
     if (!task) {
       player_state.task_state = TaskStates.IDLE
-      game.print('[AUTORIO] All tasks completed')
-      log('[AUTORIO] All tasks completed')
+      game.print('[AUTORIO] All operations completed')
+      log('[AUTORIO] All operations completed')
       return
     }
 

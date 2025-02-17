@@ -126,7 +126,7 @@ function log_player_info(player_id: number) {
   log(`[AUTORIO] Player ${player.name} info: ${serpent.block(log_data)}`)
 }
 
-remote.add_interface('autorio_tasks', {
+remote.add_interface('autorio_operations', {
   walk_to_entity: (entity_name: string, search_radius: number) => {
     log(`[AUTORIO] New walk_to_entity task: ${entity_name}, radius: ${search_radius}`)
     task_manager.add_task({

@@ -7,7 +7,7 @@ import { client, v2FactorioConsoleCommandMessagePost, v2FactorioConsoleCommandRa
 import { connect } from 'it-ws'
 import { initEnv, rconClientConfig, wsClientConfig } from './config'
 import { createMessageHandler } from './llm/message-handler'
-import { parseChatMessage, parseModErrorMessage, parseTaskCompletedMessage } from './parser'
+import { parseChatMessage, parseModErrorMessage, parseOperationCompletedMessage } from './parser'
 
 setGlobalFormat(Format.Pretty)
 const logger = useLogg('main').useGlobalConfig()
@@ -33,11 +33,11 @@ async function executeCommandFromAgent<T extends StdoutMessage>(message: T, mess
     },
   })
 
-  if (llmResponse.taskCommands.length === 0) {
+  if (llmResponse.operationCommands.length === 0) {
     return
   }
 
-  const command = llmResponse.taskCommands.join(';')
+  const command = llmResponse.operationCommands.join(';')
   await v2FactorioConsoleCommandRawPost({
     body: {
       input: `/c ${command}`,
@@ -81,11 +81,11 @@ async function main() {
       continue
     }
 
-    const taskCompletedMessage = parseTaskCompletedMessage(line)
-    if (taskCompletedMessage) {
-      gameLogger.withContext('mod').log(`All tasks completed`)
+    const operationCompletedMessage = parseOperationCompletedMessage(line)
+    if (operationCompletedMessage) {
+      gameLogger.withContext('mod').log(`All operations completed`)
 
-      await executeCommandFromAgent(taskCompletedMessage, messageHandler)
+      await executeCommandFromAgent(operationCompletedMessage, messageHandler)
       continue
     }
   }

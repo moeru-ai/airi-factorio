@@ -37,8 +37,8 @@ export async function createMessageHandler() {
     else if (message.type === 'modError') {
       messages.push(user(`[MOD] Error: ${message.error}`))
     }
-    else if (message.type === 'taskCompleted') {
-      messages.push(user(`[MOD] All tasks completed`))
+    else if (message.type === 'operationsCompleted') {
+      messages.push(user(`[MOD] All operations completed`))
     }
 
     const response = await agent.call(messages, {
