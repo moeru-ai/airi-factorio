@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { parseChatMessage, parseCommandMessage, parseModErrorMessage, parseTaskCompletedMessage } from './parser'
+import { parseChatMessage, parseCommandMessage, parseModErrorMessage, parseOperationCompletedMessage } from './parser'
 
 describe('parseCommandMessage', () => {
   it('should parse player command', () => {
@@ -65,13 +65,13 @@ describe('parseModErrorMessage', () => {
   })
 })
 
-describe('parseTaskCompletedMessage', () => {
-  it('should parse task completed message', () => {
-    const log = `51.889 Script @__autorio__/control.lua:920: [AUTORIO] All tasks completed`
-    const result = parseTaskCompletedMessage(log)
+describe('parseOperationCompletedMessage', () => {
+  it('should parse operation completed message', () => {
+    const log = `51.889 Script @__autorio__/control.lua:920: [AUTORIO] All operations completed`
+    const result = parseOperationCompletedMessage(log)
     expect(result).toEqual({
       serverTimestamp: '51.889',
-      type: 'taskCompleted',
+      type: 'operationCompleted',
     })
   })
 })

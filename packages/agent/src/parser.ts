@@ -20,16 +20,18 @@ export interface ModErrorMessage {
   error: string
 }
 
-export interface TaskCompletedMessage {
-  type: 'taskCompleted'
+export interface OperationCompletedMessage {
+  type: 'operationsCompleted'
   serverTimestamp: string
 }
 
-export type StdoutMessage = ChatMessage | CommandMessage | ModErrorMessage | TaskCompletedMessage
+export type StdoutMessage = ChatMessage | CommandMessage | ModErrorMessage | OperationCompletedMessage
 
 export interface LLMMessage {
   chatMessage: string
-  taskCommands: string[]
+  operationCommands: string[]
+  plan: string[]
+  currentStep: number
 }
 
 export function parseLLMMessage(message: string): LLMMessage {
@@ -93,14 +95,14 @@ export function parseModErrorMessage(log: string): ModErrorMessage | null {
   return null
 }
 
-export function parseTaskCompletedMessage(log: string): TaskCompletedMessage | null {
-  // example: 51.889 Script @__autorio__/control.lua:920: [AUTORIO] All tasks completed
-  const taskCompletedRegex = /(\d+\.\d{3}) Script @__autorio__\/control\.lua:(\d+): \[AUTORIO\] All tasks completed/
-  const taskCompletedMatch = log.match(taskCompletedRegex)
+export function parseOperationCompletedMessage(log: string): OperationCompletedMessage | null {
+  // example: 51.889 Script @__autorio__/control.lua:920: [AUTORIO] All operations completed
+  const operationCompletedRegex = /(\d+\.\d{3}) Script @__autorio__\/control\.lua:(\d+): \[AUTORIO\] All operations completed/
+  const operationCompletedMatch = log.match(operationCompletedRegex)
 
-  if (taskCompletedMatch) {
-    const [, serverTimestamp] = taskCompletedMatch
-    return { serverTimestamp, type: 'taskCompleted' }
+  if (operationCompletedMatch) {
+    const [, serverTimestamp] = operationCompletedMatch
+    return { serverTimestamp, type: 'operationsCompleted' }
   }
 
   return null

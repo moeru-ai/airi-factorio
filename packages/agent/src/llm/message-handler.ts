@@ -1,11 +1,11 @@
-import type { ChatCompletion, DefinedTool, Message } from 'neuri/openai'
+import type { DefinedTool, Message } from 'neuri/openai'
 
 import type { StdoutMessage } from '../parser'
 import { createLogg } from '@guiiai/logg'
-import { composeAgent, defineToolFunction, system, toolFunction, user } from 'neuri/openai'
+import { assistant, composeAgent, defineToolFunction, system, toolFunction, user } from 'neuri/openai'
 import { openaiConfig } from '../config'
 import { parseLLMMessage } from '../parser'
-import { prompt } from './prompt'
+import prompt from './prompt.md?raw'
 import { tools } from './tools'
 
 const logger = createLogg('agent').useGlobalConfig()
@@ -37,21 +37,14 @@ export async function createMessageHandler() {
     else if (message.type === 'modError') {
       messages.push(user(`[MOD] Error: ${message.error}`))
     }
-    else if (message.type === 'taskCompleted') {
-      messages.push(user(`[MOD] All tasks completed`))
+    else if (message.type === 'operationsCompleted') {
+      messages.push(user(`[MOD] All operations completed`))
     }
 
-    let response: ChatCompletion | undefined
-    try {
-      response = await agent.call(messages, {
-        model: 'gpt-4o',
-        maxRoundTrip: 10,
-      })
-    }
-    catch (error) {
-      logger.withFields({ error }).error('Error calling agent')
-      return null
-    }
+    const response = await agent.call(messages, {
+      model: 'gpt-4o',
+      maxRoundTrip: 10,
+    })
 
     if (!response) {
       logger.withFields({ response }).error('LLM responded with null')
@@ -69,7 +62,10 @@ export async function createMessageHandler() {
       return null
     }
 
-    return parseLLMMessage(messageFromLLM) // TODO: handle error and retry
+    const parsedMessage = parseLLMMessage(messageFromLLM)
+    messages.push(assistant(`${JSON.stringify(parsedMessage)}`))
+
+    return parsedMessage
   }
 
   return {

@@ -14,7 +14,7 @@
   ],
   "scripts": {
     "build": "unbuild",
-    "dev": "dotenvx run -f .env -f .env.local --overload --debug -- tsx src/main.ts",
+    "dev": "vite-node src/main.ts",
     "start": "dotenvx run -f .env -f .env.local --overload -- tsx src/main.ts",
     "typecheck": "tsc --noEmit",
     "test": "vitest"
@@ -25,6 +25,7 @@
     "@xsai/generate-text": "^0.1.0-beta.5",
     "@xsai/providers": "^0.1.0-beta.5",
     "execa": "^9.5.2",
+    "exponential-backoff": "^3.1.2",
     "factorio-rcon-api-client": "^2.0.4",
     "it-ws": "^6.1.5",
     "neuri": "^0.0.22",
@@ -35,6 +36,8 @@
     "@types/node": "^22.13.4",
     "tsx": "^4.19.2",
     "unbuild": "^3.3.1",
+    "vite": "^6.1.0",
+    "vite-node": "^3.0.5",
     "vitest": "^3.0.5"
   }
 }

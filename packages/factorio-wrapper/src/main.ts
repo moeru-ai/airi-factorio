@@ -1,5 +1,6 @@
 import type { ResultPromise } from 'execa'
 import { arch } from 'node:os'
+import process from 'node:process'
 import { Format, setGlobalFormat, useLogg } from '@guiiai/logg'
 import { execa } from 'execa'
 import { WebSocketServer } from 'ws'
@@ -48,14 +49,27 @@ async function main() {
   if (arch() === 'arm64') {
     args.unshift(factorioConfig.path)
     factorioInst = execa('/bin/box64', args, {
-      stdout: ['pipe', 'inherit'],
+      stdout: ['pipe'],
     })
   }
   else {
     factorioInst = execa(factorioConfig.path, args, {
-      stdout: ['pipe', 'inherit'],
+      stdout: ['pipe'],
     })
   }
+
+  factorioInst.on('exit', (code, signal) => {
+    logger.log(`Factorio exited with code ${code} and signal ${signal}`)
+    wsServer.close()
+    process.exit(0)
+  })
+
+  process.on('SIGTERM', () => {
+    logger.log('SIGTERM received, shutting down...')
+    wsServer.close()
+    factorioInst?.kill()
+    process.exit(0)
+  })
 
   for await (const line of factorioInst.iterable()) {
     gameLogger.withContext('game').log(line)

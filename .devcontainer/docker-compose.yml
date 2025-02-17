@@ -13,7 +13,7 @@ services:
     entrypoint: /bin/bash
     command: ["-c", "trap : TERM INT; sleep infinity & wait"]
   rcon-api:
-    image: ghcr.io/nekomeowww/factorio-rcon-api:2.0.5
+    image: ghcr.io/nekomeowww/factorio-rcon-api:2.0.6
     network_mode: host
     environment:
       FACTORIO_RCON_HOST: localhost
