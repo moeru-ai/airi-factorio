@@ -19,7 +19,6 @@ export async function createMessageHandler() {
 
   const agent = composeAgent({
     provider: {
-      model: 'gpt-4o',
       apiKey: openaiConfig.apiKey,
       baseURL: openaiConfig.baseUrl,
     },
