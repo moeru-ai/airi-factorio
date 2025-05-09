@@ -2,7 +2,7 @@
   "name": "autorio.ts",
   "type": "module",
   "version": "1.0.0",
-  "packageManager": "pnpm@10.4.0",
+  "packageManager": "pnpm@10.10.0",
   "description": "An automation mod for Factorio written in TypeScript.",
   "author": "LemonNekoGH",
   "license": "MIT",
@@ -25,13 +25,13 @@
     "typecheck": "pnpm -r --filter=./packages/* run typecheck"
   },
   "devDependencies": {
-    "@antfu/eslint-config": "^4.2.0",
-    "@antfu/ni": "^23.3.1",
-    "eslint": "^9.20.1",
-    "lint-staged": "^15.5.1",
-    "simple-git-hooks": "^2.11.1",
-    "taze": "^18.5.0",
-    "typescript": "~5.7.3"
+    "@antfu/eslint-config": "^4.13.0",
+    "@antfu/ni": "^24.3.0",
+    "eslint": "^9.26.0",
+    "lint-staged": "^15.5.2",
+    "simple-git-hooks": "^2.13.0",
+    "taze": "^19.1.0",
+    "typescript": "~5.8.3"
   },
   "pnpm": {
     "onlyBuiltDependencies": [

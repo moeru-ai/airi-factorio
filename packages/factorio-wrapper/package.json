@@ -2,7 +2,7 @@
   "name": "@proj-airi/factorio-wrapper",
   "type": "module",
   "version": "0.1.0",
-  "packageManager": "pnpm@10.4.0",
+  "packageManager": "pnpm@10.10.0",
   "description": "Run factorio server and convert std stream to websocket stream",
   "author": "LemonNekoGH",
   "license": "MIT",
@@ -19,16 +19,16 @@
     "test": "vitest"
   },
   "dependencies": {
-    "@dotenvx/dotenvx": "^1.36.0",
-    "@guiiai/logg": "^1.0.7",
-    "execa": "^9.5.2",
-    "ws": "^8.18.0"
+    "@dotenvx/dotenvx": "^1.43.0",
+    "@guiiai/logg": "^1.0.10",
+    "execa": "^9.5.3",
+    "ws": "^8.18.2"
   },
   "devDependencies": {
-    "@types/node": "^22.13.4",
-    "@types/ws": "^8.5.14",
-    "tsx": "^4.19.2",
-    "unbuild": "^3.3.1",
-    "vitest": "^3.0.5"
+    "@types/node": "^22.15.17",
+    "@types/ws": "^8.18.1",
+    "tsx": "^4.19.4",
+    "unbuild": "^3.5.0",
+    "vitest": "^3.1.3"
   }
 }
