@@ -1,7 +1,7 @@
 {
   "name": "@proj-airi/tstl-plugin-reload-factorio-mod",
   "version": "0.1.0",
-  "packageManager": "pnpm@10.10.0",
+  "packageManager": "pnpm@10.11.0",
   "description": "A plugin for tstl to reload factorio mod.",
   "author": "LemonNekoGH",
   "license": "MIT",
@@ -24,11 +24,11 @@
     "typescript-to-lua": "^1.31.0"
   },
   "devDependencies": {
-    "@antfu/eslint-config": "^4.13.0",
-    "@types/node": "^22.15.17",
-    "eslint": "^9.26.0",
+    "@antfu/eslint-config": "^4.13.1",
+    "@types/node": "^22.15.19",
+    "eslint": "^9.27.0",
     "lua-types": "^2.13.1",
-    "typed-factorio": "^3.20.0",
+    "typed-factorio": "^3.21.0",
     "typescript": "^5.8.3",
     "unbuild": "^3.5.0"
   }
