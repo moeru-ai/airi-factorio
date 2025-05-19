@@ -2,7 +2,7 @@
   "name": "@proj-airi/factorio-agent",
   "type": "module",
   "version": "0.1.0",
-  "packageManager": "pnpm@10.10.0",
+  "packageManager": "pnpm@10.11.0",
   "description": "An agent for Factorio written in TypeScript.",
   "author": "LemonNekoGH",
   "license": "MIT",
@@ -20,20 +20,20 @@
     "test": "vitest"
   },
   "dependencies": {
-    "@dotenvx/dotenvx": "^1.43.0",
+    "@dotenvx/dotenvx": "^1.44.0",
     "@guiiai/logg": "^1.0.10",
-    "@xsai/generate-text": "^0.2.0",
+    "@xsai/generate-text": "^0.2.2",
     "@xsai/providers": "^0.1.0-beta.5",
     "execa": "^9.5.3",
     "exponential-backoff": "^3.1.2",
     "factorio-rcon-api-client": "^2.0.4",
     "it-ws": "^6.1.5",
-    "neuri": "^0.1.4",
+    "neuri": "^0.1.6",
     "zod": "^3.24.4",
     "zod-to-json-schema": "^3.24.5"
   },
   "devDependencies": {
-    "@types/node": "^22.15.17",
+    "@types/node": "^22.15.19",
     "tsx": "^4.19.4",
     "unbuild": "^3.5.0",
     "vite": "^6.3.5",
