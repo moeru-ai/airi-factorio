@@ -1,8 +1,8 @@
 {
-  "name": "autorio.ts",
+  "name": "@proj-airi/autorio-workspace",
   "type": "module",
   "version": "1.0.0",
-  "packageManager": "pnpm@10.11.0",
+  "packageManager": "pnpm@10.13.1",
   "description": "An automation mod for Factorio written in TypeScript.",
   "author": "LemonNekoGH",
   "license": "MIT",
@@ -25,10 +25,10 @@
     "typecheck": "pnpm -r --filter=./packages/* run typecheck"
   },
   "devDependencies": {
-    "@antfu/eslint-config": "^4.13.1",
-    "@antfu/ni": "^24.4.0",
-    "eslint": "^9.27.0",
-    "lint-staged": "^16.0.0",
+    "@antfu/eslint-config": "^4.17.0",
+    "@antfu/ni": "^25.0.0",
+    "eslint": "^9.31.0",
+    "lint-staged": "^16.1.2",
     "simple-git-hooks": "^2.13.0",
     "taze": "^19.1.0",
     "typescript": "~5.8.3"
@@ -45,8 +45,5 @@
   },
   "lint-staged": {
     "*": "eslint --fix"
-  },
-  "workspaces": [
-    "packages/*"
-  ]
+  }
 }
