@@ -76,16 +76,16 @@ export interface PlayerParametersWaiting {
   remaining_ticks: number
 }
 
-export type PlayerParameters =
-  | PlayerParametersWalkToEntity
-  | PlayerParametersWalkingDirect
-  | PlayerParametersMineEntity
-  | PlayerParametersPlaceEntity
-  | PlayerParametersMoveItems
-  | PlayerParametersCraftItem
-  | PlayerParametersAttackNearestEnemy
-  | PlayerParametersResearchTechnology
-  | PlayerParametersWaiting
+export type PlayerParameters
+  = | PlayerParametersWalkToEntity
+    | PlayerParametersWalkingDirect
+    | PlayerParametersMineEntity
+    | PlayerParametersPlaceEntity
+    | PlayerParametersMoveItems
+    | PlayerParametersCraftItem
+    | PlayerParametersAttackNearestEnemy
+    | PlayerParametersResearchTechnology
+    | PlayerParametersWaiting
 
 export interface PlayerState {
   task_state: TaskStates

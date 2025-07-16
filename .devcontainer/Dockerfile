@@ -1,14 +1,14 @@
 # Factorio does not have stable support for arm64
 FROM factoriotools/factorio:2.0.30
 
-ARG PNPM_VERSION=10.4.0
-ENV PNPM_VERSION=${PNPM_VERSION:-10.4.0}
+ARG PNPM_VERSION=10.13.1
+ENV PNPM_VERSION=${PNPM_VERSION:-10.13.1}
 # https://pnpm.io/docker
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
 
 # install nodejs
-RUN curl -fsSL https://deb.nodesource.com/setup_22.x | bash -
+RUN curl -fsSL https://deb.nodesource.com/setup_24.x | bash -
 RUN apt-get update && apt-get install -y nodejs git file curl ca-certificates
 RUN corepack enable
 
