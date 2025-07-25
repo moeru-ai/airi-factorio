@@ -8,4 +8,9 @@ done
 
 x11vnc -display $DISPLAY -nopw -forever &
 
-./factorio/bin/x64/factorio
+./factorio/bin/x64/factorio \
+  --disable-audio \
+  --force-graphics-preset very-low \
+  --window-size 1024x768 \
+  --graphics-quality low \
+  --video-memory-usage low
