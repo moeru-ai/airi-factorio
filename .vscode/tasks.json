@@ -1,0 +1,23 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "type": "npm",
+      "script": "build:extension",
+      "presentation": {
+        "reveal": "never"
+      },
+      "problemMatcher": [
+        {
+          "base": "$ts-webpack-watch",
+          "background": {
+            "activeOnStart": true,
+            "beginsPattern": "Build start",
+            "endsPattern": "Build complete"
+          }
+        }
+      ],
+      "group": "build"
+    }
+  ]
+}

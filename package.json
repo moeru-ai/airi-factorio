@@ -20,6 +20,8 @@
     "dev": "pnpm dev:packages",
     "build:packages": "pnpm -r --filter=./packages/* run build",
     "dev:packages": "pnpm -r --filter=./packages/* run dev",
+    "dev:extension": "pnpm -r --filter=./packages/vscode-factorio-rcon-evaluator run dev",
+    "build:extension": "pnpm -r --filter=./packages/vscode-factorio-rcon-evaluator run build",
     "lint": "eslint --cache .",
     "lint:fix": "eslint --cache --fix .",
     "typecheck": "pnpm -r --filter=./packages/* run typecheck",
@@ -34,11 +36,14 @@
     "lint-staged": "^16.1.2",
     "simple-git-hooks": "^2.13.0",
     "taze": "^19.1.0",
+    "typed-factorio": "^3.26.0",
     "typescript": "~5.8.3"
   },
   "pnpm": {
     "onlyBuiltDependencies": [
+      "@vscode/vsce-sign",
       "esbuild",
+      "keytar",
       "simple-git-hooks",
       "unrs-resolver"
     ]

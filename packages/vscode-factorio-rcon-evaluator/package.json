@@ -1,0 +1,86 @@
+{
+  "publisher": "LemonNeko",
+  "name": "vscode-factorio-rcon-evaluator",
+  "displayName": "Factorio RCON Evaluator",
+  "type": "module",
+  "version": "0.1.0",
+  "description": "Evaluate factorio lua script via rcon protocol in VSCode",
+  "author": "LemonNekoGH",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/moeru-ai/airi-factorio",
+    "directory": "packages/vscode-factorio-rcon-evaluator"
+  },
+  "keywords": [
+    "factorio",
+    "rcon",
+    "vscode",
+    "lua",
+    "typescript"
+  ],
+  "preview": true,
+  "categories": [
+    "Other"
+  ],
+  "main": "./dist/index.js",
+  "files": [
+    "LICENSE",
+    "README.md",
+    "dist",
+    "package.json"
+  ],
+  "engines": {
+    "vscode": "^1.100.0"
+  },
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "contributes": {
+    "commands": [
+      {
+        "command": "factorio-rcon-evaluator.run",
+        "title": "Evaluate Selected Code"
+      }
+    ],
+    "configuration": {
+      "type": "object",
+      "properties": {
+        "rconHost": {
+          "type": "string",
+          "default": "localhost",
+          "description": "The hostname of the Factorio server."
+        },
+        "rconPort": {
+          "type": "number",
+          "default": 27015,
+          "description": "The RCON port of the Factorio server."
+        },
+        "rconPassword": {
+          "type": "string",
+          "default": "",
+          "description": "The RCON password for the Factorio server."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "build": "tsdown src/index.ts --external vscode",
+    "dev": "nr build --watch src",
+    "publish": "nr build && vsce publish --no-dependencies",
+    "package": "nr build && vsce package --no-dependencies",
+    "test": "vitest"
+  },
+  "dependencies": {
+    "lua-types": "^2.13.1",
+    "rcon-client": "^4.2.5",
+    "typed-factorio": "^3.26.0",
+    "typescript-to-lua": "^1.31.3"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.100.0",
+    "@vscode/vsce": "^3.6.0",
+    "tsdown": "^0.13.0",
+    "typescript": "^5.8.3"
+  }
+}
