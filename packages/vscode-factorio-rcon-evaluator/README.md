@@ -1,7 +1,10 @@
 # vscode-factorio-rcon-evaluator
 
-## TODO-List
+![Logo](assets/logo.png)
 
-- [ ] One-click evaluation of the current code block
-- [ ] Read configurations
-- [ ] Better error handling: https://github.com/microsoft/TypeScript/wiki/Using-the-Compiler-API#a-minimal-compiler
+This extension allows you to evaluate TypeScript in Factorio using the RCON protocol.
+
+# Use Case
+
+- Mod development
+- Script debugging

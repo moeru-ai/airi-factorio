@@ -3,7 +3,7 @@
   "name": "vscode-factorio-rcon-evaluator",
   "displayName": "Factorio RCON Evaluator",
   "type": "module",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Evaluate factorio lua script via rcon protocol in VSCode",
   "author": "LemonNekoGH",
   "license": "MIT",
@@ -19,14 +19,16 @@
     "lua",
     "typescript"
   ],
-  "preview": true,
   "categories": [
     "Other"
   ],
   "main": "./dist/index.js",
+  "icon": "assets/logo.png",
+  "preview": true,
   "files": [
     "LICENSE",
     "README.md",
+    "assets",
     "dist",
     "package.json"
   ],
@@ -39,7 +41,7 @@
   "contributes": {
     "commands": [
       {
-        "command": "factorio-rcon-evaluator.run",
+        "command": "lemonneko.vscode-factorio-rcon-evaluator.run",
         "title": "Evaluate Selected Code"
       }
     ],
@@ -49,17 +51,17 @@
         "rconHost": {
           "type": "string",
           "default": "localhost",
-          "description": "The hostname of the Factorio server."
+          "description": "The hostname of the Factorio server. You can pass `--rcon-host` to server to specify the hostname. https://wiki.factorio.com/Command_line_parameters"
         },
         "rconPort": {
           "type": "number",
           "default": 27015,
-          "description": "The RCON port of the Factorio server."
+          "description": "The RCON port of the Factorio server. You can pass `--rcon-port` to server to specify the port. https://wiki.factorio.com/Command_line_parameters"
         },
         "rconPassword": {
           "type": "string",
           "default": "",
-          "description": "The RCON password for the Factorio server."
+          "description": "The RCON password for the Factorio server. You can pass `--rcon-password` to server to specify the password. https://wiki.factorio.com/Command_line_parameters"
         }
       }
     }
