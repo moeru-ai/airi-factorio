@@ -3,7 +3,7 @@
   "name": "vscode-factorio-rcon-evaluator",
   "displayName": "Factorio RCON Evaluator",
   "type": "module",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "description": "Evaluate factorio lua script via rcon protocol in VSCode",
   "author": "LemonNekoGH",
   "license": "MIT",
@@ -41,8 +41,14 @@
   "contributes": {
     "commands": [
       {
-        "command": "lemonneko.vscode-factorio-rcon-evaluator.run",
-        "title": "Evaluate Selected Code"
+        "command": "lemonneko.vscode-factorio-rcon-evaluator.evaluate-selected",
+        "title": "Evaluate Selected Code",
+        "category": "Factorio RCON Evaluator"
+      },
+      {
+        "command": "lemonneko.vscode-factorio-rcon-evaluator.evaluate-code",
+        "title": "Evaluate Code",
+        "category": "Factorio RCON Evaluator"
       }
     ],
     "configuration": {
@@ -76,6 +82,7 @@
   "dependencies": {
     "lua-types": "^2.13.1",
     "rcon-client": "^4.2.5",
+    "ts-morph": "^26.0.0",
     "typed-factorio": "^3.26.0",
     "typescript-to-lua": "^1.31.3"
   },

@@ -4,11 +4,16 @@ import { Rcon } from 'rcon-client'
 import { BuildMode, LuaLibImportKind, LuaTarget, transpileString } from 'typescript-to-lua'
 import { commands, window } from 'vscode'
 import { ConfigurationKey, getConfig } from './config'
-import { extensionIdentifier } from './constants'
+import { commandEvaluateCode, commandEvaluateSelected } from './constants'
 
-const cmds = [
+interface Command {
+  command: string
+  execute: (ctx: Context, ...args: any[]) => Promise<void>
+}
+
+const cmds: Command[] = [
   {
-    command: `${extensionIdentifier}.run`,
+    command: commandEvaluateSelected,
     execute: async (ctx: Context) => {
       const channel = ctx.outputChannel
       channel.appendLine('=========================')
@@ -25,8 +30,17 @@ const cmds = [
         return
       }
 
+      commands.executeCommand(commandEvaluateCode, selectedText)
+    },
+  },
+  {
+    command: commandEvaluateCode,
+    execute: async (ctx: Context, code: string) => {
+      const channel = ctx.outputChannel
+      channel.appendLine('=========================')
+
       const transpileResult = transpileString(
-        selectedText.trim(),
+        code.trim(),
         {
           luaTarget: LuaTarget.LuaJIT,
           luaLibImport: LuaLibImportKind.Inline,
@@ -98,5 +112,5 @@ const cmds = [
 export function registerCommand(
   ctx: Context,
 ): Disposable[] {
-  return cmds.map(cmd => commands.registerCommand(cmd.command, () => cmd.execute(ctx)))
+  return cmds.map(cmd => commands.registerCommand(cmd.command, (...args) => cmd.execute(ctx, ...args)))
 }
