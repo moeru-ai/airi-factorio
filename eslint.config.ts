@@ -41,6 +41,7 @@ export default antfu(
     files: [
       'packages/autorio/**/*.ts',
       'packages/tstl-plugin-reload-factorio-mod/example/*.ts',
+      'packages/factorio-rcon-snippets/**/*.ts',
     ],
   },
   // #endregion

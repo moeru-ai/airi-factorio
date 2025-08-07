@@ -118,6 +118,21 @@ importers:
         specifier: ^1.31.4
         version: 1.31.4(typescript@5.9.2)
 
+  packages/factorio-rcon-snippets:
+    devDependencies:
+      lua-types:
+        specifier: ^2.13.1
+        version: 2.13.1
+      typed-factorio:
+        specifier: ^3.27.0
+        version: 3.27.0(lua-types@2.13.1)(typescript-to-lua@1.31.4(typescript@5.9.2))
+      typescript:
+        specifier: ^5.9.2
+        version: 5.9.2
+      typescript-to-lua:
+        specifier: ^1.31.4
+        version: 1.31.4(typescript@5.9.2)
+
   packages/factorio-wrapper:
     dependencies:
       '@dotenvx/dotenvx':
