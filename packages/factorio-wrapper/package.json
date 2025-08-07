@@ -18,16 +18,16 @@
     "test": "vitest"
   },
   "dependencies": {
-    "@dotenvx/dotenvx": "^1.47.6",
+    "@dotenvx/dotenvx": "^1.48.4",
     "@guiiai/logg": "^1.0.10",
     "execa": "^9.6.0",
     "ws": "^8.18.3"
   },
   "devDependencies": {
-    "@types/node": "^22.16.4",
+    "@types/node": "^22.17.0",
     "@types/ws": "^8.18.1",
     "tsx": "^4.20.3",
-    "unbuild": "^3.5.0",
+    "unbuild": "^3.6.0",
     "vitest": "^3.2.4"
   }
 }
