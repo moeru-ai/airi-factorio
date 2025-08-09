@@ -118,7 +118,22 @@ importers:
         specifier: ^1.31.4
         version: 1.31.4(typescript@5.9.2)
 
-  packages/factorio-rcon-snippets:
+  packages/factorio-rcon-snippets-for-node:
+    devDependencies:
+      '@dotenvx/dotenvx':
+        specifier: ^1.48.4
+        version: 1.48.4
+      rcon-client:
+        specifier: ^4.2.5
+        version: 4.2.5
+      typescript:
+        specifier: ^5.9.2
+        version: 5.9.2
+      typescript-to-lua:
+        specifier: ^1.31.4
+        version: 1.31.4(typescript@5.9.2)
+
+  packages/factorio-rcon-snippets-for-vscode:
     devDependencies:
       lua-types:
         specifier: ^2.13.1

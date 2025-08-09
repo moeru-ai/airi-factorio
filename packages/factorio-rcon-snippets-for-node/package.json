@@ -1,11 +1,12 @@
 {
-  "name": "autorio.ts",
+  "name": "factorio-rcon-snippets-for-node",
+  "type": "module",
   "version": "0.1.0",
   "private": true,
   "author": "LemonNekoGH",
   "devDependencies": {
-    "lua-types": "^2.13.1",
-    "typed-factorio": "^3.27.0",
+    "@dotenvx/dotenvx": "^1.48.4",
+    "rcon-client": "^4.2.5",
     "typescript": "^5.9.2",
     "typescript-to-lua": "^1.31.4"
   }

@@ -31,6 +31,12 @@ export function getFunctionContent(code: string, symbol: DocumentSymbol) {
 }
 
 export class EvaluatorCodeLensProvider implements CodeLensProvider {
+  #ctx: Context
+
+  constructor(ctx: Context) {
+    this.#ctx = ctx
+  }
+
   async provideCodeLenses(document: TextDocument, _: CancellationToken) {
     if (document.languageId !== 'typescript') {
       return []
@@ -54,8 +60,8 @@ export class EvaluatorCodeLensProvider implements CodeLensProvider {
   }
 }
 
-export function registerCodeLens(_: Context): Disposable[] {
+export function registerCodeLens(ctx: Context): Disposable[] {
   return [
-    languages.registerCodeLensProvider({ language: 'typescript' }, new EvaluatorCodeLensProvider()),
+    languages.registerCodeLensProvider({ language: 'typescript' }, new EvaluatorCodeLensProvider(ctx)),
   ]
 }
