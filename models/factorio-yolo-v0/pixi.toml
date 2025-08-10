@@ -7,6 +7,7 @@ version = "0.1.0"
 
 [tasks]
 train = "python src/train.py"
+predict = "python src/predict.py"
 
 [dependencies]
 python = "<3.13"
