@@ -1,0 +1,12 @@
+
+train: images/train
+val: images/val
+test: images/test
+
+names:
+  0: assembling-machine-1
+  1: assembling-machine-2
+  2: assembling-machine-3
+  3: transport-belt
+  4: fast-transport-belt
+  5: express-transport-belt

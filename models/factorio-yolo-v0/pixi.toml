@@ -1,0 +1,16 @@
+[workspace]
+authors = [ "LemonNeko <selim@lemonneko.moe>" ]
+channels = [ "conda-forge" ]
+name = "factorio-yolo-v0"
+platforms = [ "osx-arm64" ]
+version = "0.1.0"
+
+[tasks]
+train = "python src/train.py"
+
+[dependencies]
+python = "<3.13"
+
+[pypi-dependencies]
+ultralytics = ">=8.3.176, <9"
+onnx = ">=1.18.0, <2"
