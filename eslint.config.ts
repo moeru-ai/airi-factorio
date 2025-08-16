@@ -14,7 +14,7 @@ export default antfu(
       'ts/naming-convention': 'error',
     },
     files: ['**/*.ts'],
-    ignores: ['eslint.config.ts'],
+    ignores: ['eslint.config.ts', 'apps/factorio-yolo-v0-playground/uno.config.ts'],
   },
   {
     rules: {
@@ -51,6 +51,11 @@ export default antfu(
       'no-console': 'off',
     },
     files: ['packages/vscode-factorio-rcon-evaluator/**/*.ts'],
+  },
+  // #endregion
+  // #global-ignore
+  {
+    ignores: ['models/*'],
   },
   // #endregion
 )
