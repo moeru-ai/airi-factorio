@@ -27,12 +27,14 @@ RUN ls
 
 RUN tar -xvf factorio_linux_${factorio_version}.tar.xz
 
+ENV DEBIAN_FRONTEND=noninteractive
+
 # factorio dependencies
 RUN apt-get install -y \
-    xvfb \
-    x11vnc \
-    x11-apps \
-    mesa-utils
+    # graphics
+    xvfb x11-apps mesa-utils \
+    # noVNC
+    x11vnc novnc websockify
 
 COPY start-factorio.sh /workspace/start-factorio.sh
 RUN chmod +x start-factorio.sh
@@ -42,6 +44,6 @@ RUN apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # start
 ENV DISPLAY=:1
-EXPOSE 5900
+EXPOSE 5900 5901
 
 ENTRYPOINT ["./start-factorio.sh"]
