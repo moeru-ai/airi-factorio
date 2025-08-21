@@ -12,7 +12,8 @@
     "resolveJsonModule": true,
     "types": [
       "vite/client",
-      "unplugin-vue-macros/macros-global"
+      "unplugin-vue-macros/macros-global",
+      "@types/novnc__novnc"
     ],
     "allowJs": true,
     "strict": true,

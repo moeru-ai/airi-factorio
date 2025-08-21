@@ -11,6 +11,7 @@
     "sizecheck": "npx vite-bundle-visualizer"
   },
   "dependencies": {
+    "@novnc/novnc": "1.5.0",
     "@techstark/opencv-js": "4.11.0-release.1",
     "@unhead/vue": "^2.0.5",
     "@unocss/reset": "^66.0.0",
@@ -34,6 +35,7 @@
     "@iconify-json/lucide": "^1.2.35",
     "@iconify-json/simple-icons": "^1.2.47",
     "@iconify-json/solar": "^1.2.2",
+    "@types/novnc__novnc": "1.5.0",
     "@types/nprogress": "^0.2.3",
     "@unocss/eslint-config": "^66.0.0",
     "@vitejs/plugin-vue": "^5.2.3",
