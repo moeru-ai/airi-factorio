@@ -4,6 +4,8 @@
 
 A model for detecting items in Factorio based on YOLOv11n. It can detect 6 items, see [names](./dataset/detect.yaml).
 
+Playground is hosted on [HuggingFace](https://huggingface.co/spaces/proj-airi/factorio-yolo-v0-playground).
+
 Available formats:
 - ONNX
 - PyTorch

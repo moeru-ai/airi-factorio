@@ -275,6 +275,9 @@ if (import.meta.hot) {
           <TheButton variant="outline" @click="onConnectVncBtnClick">
             Connect
           </TheButton>
+          <TheButton variant="outline" as="a" size="icon" px-2 href="https://github.com/moeru-ai/airi-factorio/tree/main/apps/factorio-yolo-v0-playground/README.md" target="_blank">
+            <span i-solar-question-circle-bold text-xl />
+          </TheButton>
         </div>
         <div class="flex gap-2">
           <div
