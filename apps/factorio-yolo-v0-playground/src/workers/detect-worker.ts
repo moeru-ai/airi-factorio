@@ -80,19 +80,31 @@ function processOutput(outputData: Float32Array, numCandidates: number) {
   return finalDetections
 }
 
+function generateInv255Lut() {
+  // Pre-calculate the inverse to avoid repeated division
+  const inv255 = 1 / 255
+
+  const lookupTable = new Float32Array(256)
+  for (let i = 0; i < 256; ++i) {
+    lookupTable[i] = i * inv255
+  }
+
+  return lookupTable
+}
+
+const INV255_LUT = generateInv255Lut()
+
 async function detectImageData(imageData: Uint8ClampedArray<ArrayBufferLike>) {
   // #region thanks to cursor!
   const totalPixels = modelSize * modelSize
   const imageDataNormalized = new Float32Array(totalPixels * 3)
-
-  // Pre-calculate the inverse to avoid repeated division
-  const inv255 = 1 / 255
+  const bOffset = totalPixels << 1
 
   // Single pass with direct indexing - much faster than push operations
-  for (let i = 0, pixelIndex = 0; i < totalPixels * 4; i += 4, pixelIndex++) {
-    imageDataNormalized[pixelIndex] = imageData[i] * inv255 // R channel
-    imageDataNormalized[pixelIndex + totalPixels] = imageData[i + 1] * inv255 // G channel
-    imageDataNormalized[pixelIndex + totalPixels * 2] = imageData[i + 2] * inv255 // B channel
+  for (let i = 0, pixelIndex = 0; pixelIndex < totalPixels; i += 4, pixelIndex++) {
+    imageDataNormalized[pixelIndex] = INV255_LUT[imageData[i]] // R channel
+    imageDataNormalized[pixelIndex + totalPixels] = INV255_LUT[imageData[i + 1]] // G channel
+    imageDataNormalized[pixelIndex + bOffset] = INV255_LUT[imageData[i + 2]] // B channel
   }
   // #endregion
 
