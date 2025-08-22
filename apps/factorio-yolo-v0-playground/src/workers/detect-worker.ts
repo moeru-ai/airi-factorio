@@ -98,15 +98,17 @@ async function detectImageData(imageData: Uint8ClampedArray<ArrayBufferLike>) {
   // #region thanks to cursor!
   const totalPixels = modelSize * modelSize
   const imageDataNormalized = new Float32Array(totalPixels * 3)
-  const bOffset = totalPixels << 1
+  // Pre-calculate offset pointer addresses
+  const gChannel = imageDataNormalized.subarray(totalPixels)
+  const bChannel = gChannel.subarray(totalPixels)
 
   // Single pass with direct indexing - much faster than push operations
   for (let i = 0, pixelIndex = 0; pixelIndex < totalPixels; i += 4, pixelIndex++) {
     imageDataNormalized[pixelIndex] = INV255_LUT[imageData[i]] // R channel
     // Actually we can use bitwise OR instead of addition here as `i` will always be
     // multiple of 4, i.e. xxxxx00b. So `i + 1` will be xxxxx01b, which is the same as `i | 1`
-    imageDataNormalized[pixelIndex + totalPixels] = INV255_LUT[imageData[i | 1]] // G channel
-    imageDataNormalized[pixelIndex + bOffset] = INV255_LUT[imageData[i | 2]] // B channel
+    gChannel[pixelIndex] = INV255_LUT[imageData[i | 1]]
+    bChannel[pixelIndex] = INV255_LUT[imageData[i | 2]]
   }
   // #endregion
 
