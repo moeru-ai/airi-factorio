@@ -33,10 +33,10 @@ WS_SERVER_HOST='localhost'
   console.log('Creating save file...\n\n===== Game output starts =====\n')
 
   if (arch() === 'arm64') {
-    await execa('box64', ['/opt/factorio/bin/x64/factorio', '--create', '/opt/factorio/save.zip'], { stdio: 'inherit' })
+    await execa('box64', ['/opt/factorio/bin/x64/factorio', '--create', '/opt/factorio/the-save-file.zip'], { stdio: 'inherit' })
   }
   else {
-    await execa('/opt/factorio/bin/x64/factorio', ['--create', '/opt/factorio/save.zip'], { stdio: 'inherit' })
+    await execa('/opt/factorio/bin/x64/factorio', ['--create', '/opt/factorio/the-save-file.zip'], { stdio: 'inherit' })
   }
 
   console.log('\n\n===== Game output ends =====\n\nCreated save file')

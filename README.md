@@ -54,11 +54,11 @@ It's hard to describe the project structure in a few words, but it currently loo
 5. Create a game save file, the save file path should be the same as the one in the `.env` file:
 
     ```bash
-    /path/to/factorio/bin/x64/factorio --create /path/to/factorio/saves/save.zip
+    /path/to/factorio/bin/x64/factorio --create /path/to/factorio/the-save-file.zip
     # If you are using DevContainer, you can use the following command:
-    /opt/factorio/bin/x64/factorio --create /path/to/factorio/saves/save.zip
+    /opt/factorio/bin/x64/factorio --create /path/to/factorio/the-save-file.zip
     # If your machine is not x64, you can use the following command:
-    box64 /opt/factorio/bin/x64/factorio --create /path/to/factorio/saves/save.zip
+    box64 /opt/factorio/bin/x64/factorio --create /path/to/factorio/the-save-file.zip
     ```
 
 6. Run the development script:
