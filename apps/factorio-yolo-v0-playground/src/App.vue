@@ -24,6 +24,32 @@ const names = ref([
 ])
 const detectWorkerInstance = new DetectWorker()
 
+function useFps() {
+  let frameCount = 0
+  let lastTime = 0
+  const fps = ref(0)
+
+  function updateFps() {
+    frameCount++
+    const currentTime = performance.now()
+    const elapsed = (currentTime - lastTime) * 0.001
+    if (elapsed >= 1) {
+      fps.value = Math.round(frameCount / elapsed)
+      frameCount = 0
+      lastTime = currentTime
+    }
+  }
+
+  updateFps()
+
+  return {
+    fps,
+    updateFps,
+  }
+}
+
+const { fps, updateFps } = useFps()
+
 const tab = useLocalStorage('factorio-yolo-v0-playground/current-tab', 'image')
 const vncAddress = useLocalStorage('factorio-yolo-v0-playground/vnc-address', 'ws://localhost:5901/websockify')
 const vncView = useTemplateRef<HTMLDivElement>('vncView')
@@ -60,7 +86,7 @@ function drawDetections(detections: Detection[]) {
   ctx.lineWidth = 2
   for (const detection of detections) {
     ctx.strokeRect(detection.topLeftX, detection.topLeftY, detection.bottomRightX - detection.topLeftX, detection.bottomRightY - detection.topLeftY)
-    ctx.fillText(names.value[detection.classId], detection.topLeftX, detection.topLeftY)
+    ctx.fillText(`${names.value[detection.classId]}: ${detection.confidence.toFixed(2)}`, detection.topLeftX, detection.topLeftY)
   }
 }
 
@@ -162,6 +188,11 @@ async function getVncFrameAndDetect() {
       canvasCtx.clearRect(0, 0, modelSize.value, modelSize.value)
       canvasCtx.putImageData(imageData, 0, 0)
       drawDetections(detections)
+
+      updateFps()
+      canvasCtx.fillStyle = 'rgb(0, 255, 0)'
+      canvasCtx.font = '20px Arial'
+      canvasCtx.fillText(`FPS: ${fps.value}`, 0, 20)
 
       detectWorkerInstance.onmessage = null
       resolve()
