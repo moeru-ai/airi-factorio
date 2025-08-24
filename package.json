@@ -16,8 +16,9 @@
     "typescript"
   ],
   "scripts": {
-    "build": "pnpm build:packages",
     "dev": "pnpm dev:packages",
+    "build": "pnpm build:apps && pnpm build:packages",
+    "build:apps": "pnpm -r --filter=./apps/* run build",
     "build:packages": "pnpm -r --filter=./packages/* run build",
     "dev:packages": "pnpm -r --filter=./packages/* run dev",
     "dev:extension": "pnpm -r --filter=./packages/vscode-factorio-rcon-evaluator run dev",
