@@ -9,4 +9,5 @@ export interface Detection {
   bottomRightY: number
   classId: number
   confidence: number
+  area?: number // Pre-computed area for faster IoU calculation
 }
