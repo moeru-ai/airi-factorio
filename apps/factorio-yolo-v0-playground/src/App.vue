@@ -1,15 +1,19 @@
 <script setup lang="ts">
 import type { Detection } from './types'
 import NoVncClient from '@novnc/novnc/lib/rfb'
+import { defineInvoke } from '@unbird/eventa'
+import { createContext } from '@unbird/eventa/adapters/webworkers'
+
 import { useFileDialog, useLocalStorage } from '@vueuse/core'
 import { onUnmounted, ref, useTemplateRef } from 'vue'
 import { toast } from 'vue-sonner'
-
 import { Button as TheButton } from '~/components/ui/button'
 import { Input as TheInput } from '~/components/ui/input'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '~/components/ui/tabs'
 import { isDark, toggleDark } from '~/composables/dark'
 import DetectWorker from '~/workers/detect-worker?worker'
+import VlmPlayWorker from '~/workers/vlm-play-worker?worker'
+import { vlmGenerateInvoke, vlmLoadModelInvoke, vlmModelLoadingProgressEvent } from './events/vlm-play-worker'
 
 const objectUrls = ref<string[]>([])
 const modelSize = ref(640)
@@ -22,7 +26,18 @@ const names = ref([
   'fast-transport-belt',
   'express-transport-belt',
 ])
+
+const loadingVlmModel = ref(false)
+const vlmModelLoaded = ref(false)
+const vlmModelLoadingProgress = ref(0)
 const detectWorkerInstance = new DetectWorker()
+const vlmPlayWorkerContext = createContext(new VlmPlayWorker()).context
+vlmPlayWorkerContext.on(vlmModelLoadingProgressEvent, (progress) => {
+  vlmModelLoadingProgress.value = progress.body ?? 0
+})
+const vlmLoadModel = defineInvoke(vlmPlayWorkerContext, vlmLoadModelInvoke)
+const vlmGenerate = defineInvoke(vlmPlayWorkerContext, vlmGenerateInvoke)
+const vlmOutput = ref('')
 
 function useFps() {
   let frameCount = 0
@@ -54,7 +69,6 @@ const tab = useLocalStorage('factorio-yolo-v0-playground/current-tab', 'image')
 const vncAddress = useLocalStorage('factorio-yolo-v0-playground/vnc-address', 'ws://localhost:5901/websockify')
 const vncView = useTemplateRef<HTMLDivElement>('vncView')
 const vncClient = ref<NoVncClient | null>(null)
-const vncAnimationFrameId = ref<number | null>(null)
 const vncCanvas = ref<HTMLCanvasElement | null>(null)
 
 function processSize(width: number, height: number, maxSize: number): [number, number] {
@@ -147,66 +161,132 @@ fileDialog.onChange((files) => {
   onFileChange(files[0])
 })
 
-async function getVncFrameAndDetect() {
-  if (!vncClient.value) {
-    vncAnimationFrameId.value = requestAnimationFrame(getVncFrameAndDetect)
-    return
-  }
+function invokeWithAnimationFrame(fn: () => Promise<void>) {
+  let animationFrameId: number | null = null
 
-  if (!vncCanvas.value) {
-    vncAnimationFrameId.value = requestAnimationFrame(getVncFrameAndDetect)
-    return
-  }
-
-  if (!vncCanvas.value.width || !vncCanvas.value.height) {
-    vncAnimationFrameId.value = requestAnimationFrame(getVncFrameAndDetect)
-    return
-  }
-
-  const ctx = vncCanvas.value.getContext('2d')
-  if (!ctx) {
-    vncAnimationFrameId.value = requestAnimationFrame(getVncFrameAndDetect)
-    return
-  }
-
-  const imageData = ctx.getImageData(0, 0, vncCanvas.value.width, vncCanvas.value.height)
-  detectWorkerInstance.postMessage({ imageData })
-
-  await new Promise<void>((resolve) => {
-    detectWorkerInstance.onmessage = (event) => {
-      if (!canvasRef.value) {
-        return
-      }
-
-      const canvasCtx = canvasRef.value.getContext('2d')
-      if (!canvasCtx) {
-        return
-      }
-
-      const { detections, imageData } = event.data
-
-      canvasCtx.clearRect(0, 0, modelSize.value, modelSize.value)
-      canvasCtx.putImageData(imageData, 0, 0)
-      drawDetections(detections)
-
-      updateFps()
-      canvasCtx.fillStyle = 'rgb(0, 255, 0)'
-      canvasCtx.font = '20px Arial'
-      canvasCtx.fillText(`FPS: ${fps.value}`, 0, 20)
-
-      detectWorkerInstance.onmessage = null
-      resolve()
+  function pause() {
+    if (animationFrameId) {
+      cancelAnimationFrame(animationFrameId)
+      animationFrameId = null
     }
-  })
+  }
 
-  vncAnimationFrameId.value = requestAnimationFrame(getVncFrameAndDetect)
+  function resume() {
+    fn().then(() => {
+      animationFrameId = requestAnimationFrame(resume)
+    }).catch((error) => {
+      console.error(error)
+    })
+  }
+
+  return {
+    pause,
+    resume,
+  }
 }
 
-function cancelVncDetect() {
-  if (vncAnimationFrameId.value) {
-    cancelAnimationFrame(vncAnimationFrameId.value)
-    vncAnimationFrameId.value = null
+const getVncFrameAndDetect = invokeWithAnimationFrame(
+  async () => {
+    if (!vncClient.value) {
+      return
+    }
+
+    if (!vncCanvas.value) {
+      return
+    }
+
+    if (!vncCanvas.value.width || !vncCanvas.value.height) {
+      return
+    }
+
+    const ctx = vncCanvas.value.getContext('2d')
+    if (!ctx) {
+      return
+    }
+
+    const imageData = ctx.getImageData(0, 0, vncCanvas.value.width, vncCanvas.value.height)
+    detectWorkerInstance.postMessage({ imageData })
+
+    await new Promise<void>((resolve) => {
+      detectWorkerInstance.onmessage = (event) => {
+        if (!canvasRef.value) {
+          return
+        }
+
+        const canvasCtx = canvasRef.value.getContext('2d')
+        if (!canvasCtx) {
+          return
+        }
+
+        const { detections, imageData } = event.data
+
+        canvasCtx.clearRect(0, 0, modelSize.value, modelSize.value)
+        canvasCtx.putImageData(imageData, 0, 0)
+        drawDetections(detections)
+
+        updateFps()
+        canvasCtx.fillStyle = 'rgb(0, 255, 0)'
+        canvasCtx.font = '20px Arial'
+        canvasCtx.fillText(`FPS: ${fps.value}`, 0, 20)
+
+        detectWorkerInstance.onmessage = null
+        resolve()
+      }
+    })
+  },
+
+)
+
+const getVncFrameAndGenerate = invokeWithAnimationFrame(
+  async () => {
+    if (!vncClient.value) {
+      return
+    }
+
+    if (!vncCanvas.value) {
+      return
+    }
+
+    const blob = await new Promise<Blob>((resolve, reject) => {
+      if (!vncCanvas.value) {
+        reject(new Error('Failed to get VNC canvas element'))
+        return
+      }
+
+      const waitForCanvasPrepared = () => {
+        if (!vncCanvas.value) {
+          requestAnimationFrame(waitForCanvasPrepared)
+          return
+        }
+
+        vncCanvas.value.toBlob((blob) => {
+          if (!blob) {
+            requestAnimationFrame(waitForCanvasPrepared)
+            return
+          }
+
+          resolve(blob)
+        })
+      }
+
+      waitForCanvasPrepared()
+    })
+
+    const result = await vlmGenerate(blob)
+    vlmOutput.value = result
+  },
+)
+
+async function onLoadVlmModelBtnClick() {
+  if (vlmModelLoaded.value) {
+    return
   }
+
+  loadingVlmModel.value = true
+  vlmModelLoadingProgress.value = 0
+  await vlmLoadModel(undefined)
+  loadingVlmModel.value = false
+  vlmModelLoaded.value = true
 }
 
 function onConnectVncBtnClick() {
@@ -218,15 +298,22 @@ function onConnectVncBtnClick() {
   vncClient.value = new NoVncClient(vncView.value, vncAddress.value)
   vncClient.value.scaleViewport = true
   vncCanvas.value = vncView.value.querySelector('canvas')
-  vncAnimationFrameId.value = requestAnimationFrame(getVncFrameAndDetect)
+
+  if (tab.value === 'vnc') {
+    getVncFrameAndDetect.resume()
+  }
+  else if (tab.value === 'vlm') {
+    getVncFrameAndGenerate.resume()
+  }
 }
 
 function onTabChange(value: string | number) {
-  if (value !== 'vnc' && vncClient.value) {
+  if (value !== 'vnc' && value !== 'vlm' && vncClient.value) {
     vncClient.value.disconnect()
     vncClient.value = null
 
-    cancelVncDetect()
+    getVncFrameAndDetect.pause()
+    getVncFrameAndGenerate.pause()
   }
 }
 
@@ -239,7 +326,8 @@ if (import.meta.hot) {
     vncClient.value?.disconnect()
     vncClient.value = null
     vncCanvas.value = null
-    cancelVncDetect()
+    getVncFrameAndDetect.pause()
+    getVncFrameAndGenerate.pause()
   })
 }
 </script>
@@ -255,7 +343,7 @@ if (import.meta.hot) {
       </div>
     </div>
 
-    <Tabs v-model="tab" default-value="image" @update:model-value="onTabChange">
+    <Tabs v-model="tab" :disabled="loadingVlmModel" default-value="image" @update:model-value="onTabChange">
       <div w-full flex justify-center>
         <TabsList mx-auto>
           <TabsTrigger value="image">
@@ -266,6 +354,9 @@ if (import.meta.hot) {
           </TabsTrigger>
           <TabsTrigger value="vnc">
             VNC
+          </TabsTrigger>
+          <TabsTrigger value="vlm">
+            VLM
           </TabsTrigger>
         </TabsList>
       </div>
@@ -352,6 +443,45 @@ if (import.meta.hot) {
               Detection result
             </div>
           </div>
+        </div>
+      </TabsContent>
+      <TabsContent value="vlm">
+        <div class="lg:hidden mb-2 text-sm text-gray-500 text-center">
+          Please use larger screen to get better experience.
+        </div>
+        <div flex gap-2 mb-2>
+          <TheInput v-model="vncAddress" />
+          <TheButton v-if="!vlmModelLoaded" :disabled="loadingVlmModel" variant="outline" @click="onLoadVlmModelBtnClick">
+            {{ vlmModelLoadingProgress !== 0 ? `Loading... ${vlmModelLoadingProgress}%` : 'Load Model' }}
+          </TheButton>
+          <TheButton v-else variant="outline" @click="onConnectVncBtnClick">
+            Connect
+          </TheButton>
+          <TheButton variant="outline" as="a" size="icon" px-2 href="https://github.com/moeru-ai/airi-factorio/tree/main/apps/factorio-yolo-v0-playground/README.md" target="_blank">
+            <span i-solar-question-circle-bold text-xl />
+          </TheButton>
+        </div>
+        <div
+          w="60 md:90 lg:120"
+          h="60 md:90 lg:120" overflow-hidden rounded-lg
+          relative
+          border="1 gray-200 dark:gray-700"
+          transition-all duration-300
+          mb-4
+        >
+          <div ref="vncView" w-full h-full class="vnc-container" />
+          <div
+            v-if="!vncClient"
+            absolute top-0 left-0 w-full h-full flex
+            justify-center items-center text-gray-500 text-sm
+          >
+            VNC view
+          </div>
+        </div>
+        <div w="60 md:90 lg:120" rounded-lg>
+          <pre class="overflow-auto">
+{{ vlmOutput }}
+</pre>
         </div>
       </TabsContent>
     </Tabs>
