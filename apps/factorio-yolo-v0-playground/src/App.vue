@@ -5,7 +5,7 @@ import { defineInvoke } from '@unbird/eventa'
 import { createContext } from '@unbird/eventa/adapters/webworkers'
 
 import { useFileDialog, useLocalStorage } from '@vueuse/core'
-import { onUnmounted, ref, useTemplateRef } from 'vue'
+import { computed, onUnmounted, ref, useTemplateRef } from 'vue'
 import { toast } from 'vue-sonner'
 import { Button as TheButton } from '~/components/ui/button'
 import { Input as TheInput } from '~/components/ui/input'
@@ -162,26 +162,36 @@ fileDialog.onChange((files) => {
 })
 
 function invokeWithAnimationFrame(fn: () => Promise<void>) {
-  let animationFrameId: number | null = null
+  const animationFrameId = ref<number | null>(null)
+  let requestToStop = false
 
   function pause() {
-    if (animationFrameId) {
-      cancelAnimationFrame(animationFrameId)
-      animationFrameId = null
+    if (animationFrameId.value) {
+      cancelAnimationFrame(animationFrameId.value)
+      animationFrameId.value = null
     }
+
+    requestToStop = true
   }
 
   function resume() {
     fn().then(() => {
-      animationFrameId = requestAnimationFrame(resume)
+      if (requestToStop) {
+        return
+      }
+
+      animationFrameId.value = requestAnimationFrame(resume)
     }).catch((error) => {
       console.error(error)
     })
   }
 
+  const isRunning = computed(() => animationFrameId.value !== null)
+
   return {
     pause,
     resume,
+    isRunning,
   }
 }
 
@@ -454,6 +464,9 @@ if (import.meta.hot) {
           <TheButton v-if="!vlmModelLoaded" :disabled="loadingVlmModel" variant="outline" @click="onLoadVlmModelBtnClick">
             {{ vlmModelLoadingProgress !== 0 ? `Loading... ${vlmModelLoadingProgress}%` : 'Load Model' }}
           </TheButton>
+          <TheButton v-else-if="getVncFrameAndGenerate.isRunning.value" variant="outline" @click="() => getVncFrameAndGenerate.pause()">
+            Stop
+          </TheButton>
           <TheButton v-else variant="outline" @click="onConnectVncBtnClick">
             Connect
           </TheButton>
@@ -461,27 +474,35 @@ if (import.meta.hot) {
             <span i-solar-question-circle-bold text-xl />
           </TheButton>
         </div>
-        <div
-          w="60 md:90 lg:120"
-          h="60 md:90 lg:120" overflow-hidden rounded-lg
-          relative
-          border="1 gray-200 dark:gray-700"
-          transition-all duration-300
-          mb-4
-        >
-          <div ref="vncView" w-full h-full class="vnc-container" />
+        <div class="flex gap-2">
           <div
-            v-if="!vncClient"
-            absolute top-0 left-0 w-full h-full flex
-            justify-center items-center text-gray-500 text-sm
+            w="60 md:90 lg:120"
+            h="60 md:90 lg:120" overflow-hidden rounded-lg
+            relative
+            border="1 gray-200 dark:gray-700"
+            transition-all duration-300
+            mb-4
           >
-            VNC view
+            <div ref="vncView" w-full h-full class="vnc-container" />
+            <div
+              v-if="!vncClient"
+              absolute top-0 left-0 w-full h-full flex
+              justify-center items-center text-gray-500 text-sm
+            >
+              VNC view
+            </div>
           </div>
-        </div>
-        <div w="60 md:90 lg:120" rounded-lg>
-          <pre class="overflow-auto">
-{{ vlmOutput }}
-</pre>
+          <div w="60 md:90 lg:120" h="60 md:90 lg:120" rounded-lg border="1 gray-200 dark:gray-700" overflow-y-scroll>
+            <div
+              v-if="!vlmOutput" w-full h-full flex
+              justify-center items-center text-gray-500 text-sm
+            >
+              Waiting for output...
+            </div>
+            <div v-else w="full h-full" p="4" text="sm">
+              {{ vlmOutput }}
+            </div>
+          </div>
         </div>
       </TabsContent>
     </Tabs>

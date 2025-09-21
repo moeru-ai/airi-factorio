@@ -42,6 +42,7 @@ export default antfu(
       'packages/autorio/**/*.ts',
       'packages/tstl-plugin-reload-factorio-mod/example/*.ts',
       'packages/factorio-rcon-snippets-for-vscode/**/*.ts',
+      'apps/factorio-yolo-v0-playground/src/workers/vlm-play-worker.ts',
     ],
   },
   // #endregion
