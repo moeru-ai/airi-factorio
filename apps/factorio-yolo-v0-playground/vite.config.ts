@@ -38,7 +38,7 @@ export default defineConfig({
       title: 'Factorio YOLO v0 Playground',
       emoji: '🎮',
       colorFrom: 'yellow',
-      colorTo: 'orange',
+      colorTo: 'red',
       sdk: 'static',
       pinned: false,
       license: 'mit',
