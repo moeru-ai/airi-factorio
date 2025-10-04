@@ -13,6 +13,7 @@ preview = [ "pixi-build" ]
 [tasks]
 lint = "ruff check ."
 lint-fix = "ruff check . --fix"
+typecheck = "ty check ."
 train-yolo-v0 = { cmd = "python src/train.py", cwd = "./models/factorio-yolo-v0" }
 predict-yolo-v0 = { cmd = "python src/predict.py", cwd = "./models/factorio-yolo-v0" }
 
@@ -24,6 +25,7 @@ ruff = ">=0.13.3,<0.14"
 ipython = ">=9.5.0, <10"
 ipykernel = ">=6.30.1, <7"
 ultralytics = ">=8.3.204,<9"
+ty = ">=0.0.1a21, <0.0.1a22"
 
 [package.build]
 backend = { name = "pixi-build-python", version = "==0.3.2" }

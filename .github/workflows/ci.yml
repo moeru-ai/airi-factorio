@@ -10,7 +10,7 @@ on:
       - main
 
 jobs:
-  lint:
+  lint-typescript:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -26,7 +26,18 @@ jobs:
       - name: Lint
         run: pnpm run lint
 
-  typecheck:
+  lint-python:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: prefix-dev/setup-pixi@v0.9.1
+        with:
+          cache: true
+
+      - name: Lint
+        run: pixi lint
+
+  typecheck-typescript:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -41,3 +52,14 @@ jobs:
 
       - name: Typecheck
         run: pnpm run build && pnpm run typecheck
+
+  typecheck-python:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: prefix-dev/setup-pixi@v0.9.1
+        with:
+          cache: true
+
+      - name: Typecheck
+        run: pixi typecheck
