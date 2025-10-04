@@ -35,7 +35,7 @@ jobs:
           cache: true
 
       - name: Lint
-        run: pixi lint
+        run: pixi run lint
 
   typecheck-typescript:
     runs-on: ubuntu-latest
@@ -62,4 +62,4 @@ jobs:
           cache: true
 
       - name: Typecheck
-        run: pixi typecheck
+        run: pixi run typecheck
