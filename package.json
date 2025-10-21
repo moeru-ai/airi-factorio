@@ -45,8 +45,14 @@
       "@vscode/vsce-sign",
       "esbuild",
       "keytar",
+      "onnxruntime-node",
+      "protobufjs",
+      "sharp",
       "simple-git-hooks",
       "unrs-resolver"
+    ],
+    "ignoredBuiltDependencies": [
+      "vue-demi"
     ]
   },
   "simple-git-hooks": {

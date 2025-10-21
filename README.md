@@ -1,6 +1,12 @@
-# airi-factorio
+<p align="center">
+  <picture>
+    <img width="100%" src="./docs/banner-1280x640.png" />
+  </picture>
+</p>
 
-Helper for アイリ to play Factorio with you.
+<h1 align="center">
+  Factorio for <a href="https://github.com/moeru-ai/airi">Project AIRI</a>
+</h1>
 
 > [!NOTE]
 >
