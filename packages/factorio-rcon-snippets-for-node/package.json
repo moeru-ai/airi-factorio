@@ -5,9 +5,9 @@
   "private": true,
   "author": "LemonNekoGH",
   "devDependencies": {
-    "@dotenvx/dotenvx": "^1.48.4",
+    "@dotenvx/dotenvx": "^1.51.0",
     "rcon-client": "^4.2.5",
-    "typescript": "^5.9.2",
-    "typescript-to-lua": "^1.31.4"
+    "typescript": "^5.9.3",
+    "typescript-to-lua": "^1.32.0"
   }
 }
