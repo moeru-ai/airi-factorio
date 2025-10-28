@@ -1,7 +1,12 @@
 import type { Detection } from '~/types'
 
+import { defineInvokeHandler } from '@unbird/eventa'
+import { createContext } from '@unbird/eventa/adapters/webworkers/worker'
 import * as ort from 'onnxruntime-web'
+import { objectDetectionInvoke } from '~/events/object-detection'
 import model from '../../../../models/factorio-yolo-v0/results/weights/best.onnx'
+
+const { context } = createContext()
 
 const numClasses = 6
 const confidenceThreshold = 0.6
@@ -127,7 +132,8 @@ function generateInv255Lut() {
 
 const INV255_LUT = generateInv255Lut()
 
-async function detectImageData(imageData: Uint8ClampedArray<ArrayBufferLike>) {
+async function detectImageData(imageDataBuffer: ArrayBuffer) {
+  const imageData = new Uint8ClampedArray(imageDataBuffer)
   // #region thanks to cursor!
   const totalPixels = modelSize * modelSize
   const imageDataNormalized = new Float32Array(totalPixels * 3)
@@ -157,11 +163,7 @@ async function detectImageData(imageData: Uint8ClampedArray<ArrayBufferLike>) {
 
   const detections = processOutput(outputData, output0.dims[2])
 
-  return detections
+  return { detections, _transfer: [imageDataBuffer] }
 }
 
-onmessage = async (event) => {
-  const { imageData } = event.data as { imageData: ImageData }
-  const detections = await detectImageData(imageData.data)
-  postMessage({ detections, imageData })
-}
+defineInvokeHandler(context, objectDetectionInvoke, detectImageData)

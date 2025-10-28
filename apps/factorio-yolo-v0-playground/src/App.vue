@@ -13,6 +13,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '~/components/ui/tabs'
 import { isDark, toggleDark } from '~/composables/dark'
 import DetectWorker from '~/workers/detect-worker?worker'
 import VlmPlayWorker from '~/workers/vlm-play-worker?worker'
+import { objectDetectionInvoke } from './events/object-detection'
 import { vlmGenerateInvoke, vlmLoadModelInvoke, vlmModelLoadingProgressEvent } from './events/vlm-play-worker'
 
 const objectUrls = ref<string[]>([])
@@ -26,6 +27,9 @@ const names = ref([
   'fast-transport-belt',
   'express-transport-belt',
 ])
+
+const objectDetectionContext = createContext(new DetectWorker()).context
+const detectObject = defineInvoke(objectDetectionContext, objectDetectionInvoke)
 
 const loadingVlmModel = ref(false)
 const vlmModelLoaded = ref(false)
@@ -209,42 +213,34 @@ const getVncFrameAndDetect = invokeWithAnimationFrame(
       return
     }
 
-    const ctx = vncCanvas.value.getContext('2d')
+    const ctx = vncCanvas.value.getContext('2d', { willReadFrequently: true })
     if (!ctx) {
       return
     }
 
+    if (!canvasRef.value) {
+      console.error('Failed to get canvas element')
+      return
+    }
+
+    const canvasCtx = canvasRef.value.getContext('2d')
+    if (!canvasCtx) {
+      console.error('Failed to get canvas context')
+      return
+    }
+
     const imageData = ctx.getImageData(0, 0, vncCanvas.value.width, vncCanvas.value.height)
-    detectWorkerInstance.postMessage({ imageData })
+    const { detections, _transfer } = await detectObject(imageData.data.buffer, { transfer: [imageData.data.buffer] })
 
-    await new Promise<void>((resolve) => {
-      detectWorkerInstance.onmessage = (event) => {
-        if (!canvasRef.value) {
-          return
-        }
+    canvasCtx.clearRect(0, 0, modelSize.value, modelSize.value)
+    canvasCtx.putImageData(new ImageData(new Uint8ClampedArray(_transfer[0]), vncCanvas.value.width, vncCanvas.value.height), 0, 0)
+    drawDetections(detections)
 
-        const canvasCtx = canvasRef.value.getContext('2d')
-        if (!canvasCtx) {
-          return
-        }
-
-        const { detections, imageData } = event.data
-
-        canvasCtx.clearRect(0, 0, modelSize.value, modelSize.value)
-        canvasCtx.putImageData(imageData, 0, 0)
-        drawDetections(detections)
-
-        updateFps()
-        canvasCtx.fillStyle = 'rgb(0, 255, 0)'
-        canvasCtx.font = '20px Arial'
-        canvasCtx.fillText(`FPS: ${fps.value}`, 0, 20)
-
-        detectWorkerInstance.onmessage = null
-        resolve()
-      }
-    })
+    updateFps()
+    canvasCtx.fillStyle = 'rgb(0, 255, 0)'
+    canvasCtx.font = '20px Arial'
+    canvasCtx.fillText(`FPS: ${fps.value}`, 0, 20)
   },
-
 )
 
 const getVncFrameAndGenerate = invokeWithAnimationFrame(
