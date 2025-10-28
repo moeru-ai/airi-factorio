@@ -56,7 +56,7 @@ export default antfu(
   // #endregion
   // #global-ignore
   {
-    ignores: ['models/*'],
+    ignores: ['models/*', '**/.pixi'],
   },
   // #endregion
 )
