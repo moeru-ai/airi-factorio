@@ -71,7 +71,7 @@ describe('parseOperationCompletedMessage', () => {
     const result = parseOperationCompletedMessage(log)
     expect(result).toEqual({
       serverTimestamp: '51.889',
-      type: 'operationCompleted',
+      type: 'operationsCompleted',
     })
   })
 })
