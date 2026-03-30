@@ -3,6 +3,8 @@ import { arch } from 'node:os'
 import { exit } from 'node:process'
 import { execa } from 'execa'
 
+const SAVE_FILE_PATH = '/opt/factorio/the-save-file.zip'
+
 async function main() {
   await symlink(
     '/workspace/airi-factorio/packages/autorio/dist',
@@ -20,7 +22,7 @@ async function main() {
   await writeFile(
     'packages/factorio-wrapper/.env.local',
     `FACTORIO_PATH='/opt/factorio/bin/x64/factorio'
-FACTORIO_SAVE_PATH='/opt/factorio/save.zip'
+FACTORIO_SAVE_PATH='${SAVE_FILE_PATH}'
 FACTORIO_RCON_PASSWORD='123456'
 FACTORIO_RCON_PORT=27015
 
@@ -33,10 +35,10 @@ WS_SERVER_HOST='localhost'
   console.log('Creating save file...\n\n===== Game output starts =====\n')
 
   if (arch() === 'arm64') {
-    await execa('box64', ['/opt/factorio/bin/x64/factorio', '--create', '/opt/factorio/the-save-file.zip'], { stdio: 'inherit' })
+    await execa('box64', ['/opt/factorio/bin/x64/factorio', '--create', SAVE_FILE_PATH], { stdio: 'inherit' })
   }
   else {
-    await execa('/opt/factorio/bin/x64/factorio', ['--create', '/opt/factorio/the-save-file.zip'], { stdio: 'inherit' })
+    await execa('/opt/factorio/bin/x64/factorio', ['--create', SAVE_FILE_PATH], { stdio: 'inherit' })
   }
 
   console.log('\n\n===== Game output ends =====\n\nCreated save file')
