@@ -246,13 +246,13 @@ remote.add_interface('autorio_operations', {
       return [false, 'Technology not available for research']
     }
 
-    const research_added = force.add_research(tech)
-    if (research_added) {
-      log(`[AUTORIO] New research_technology task: ${technology_name}`)
-      return [true, 'Research started']
-    }
-    log('[AUTORIO] Could not start new research.')
-    return [true, 'Cannot start new research.']
+    task_manager.add_task({
+      type: TaskStates.RESEARCHING,
+      technology_name,
+    })
+
+    log(`[AUTORIO] New research_technology task: ${technology_name}`)
+    return [true, 'Task started']
   },
   cancel_all_tasks: () => {
     task_manager.cancel_all_tasks()
@@ -875,6 +875,59 @@ function state_waiting() {
   task_manager.player_state.parameters_waiting.remaining_ticks -= 1
 }
 
+function state_attacking(player: LuaPlayer) {
+  const parameters = task_manager.player_state.parameters_attack_nearest_enemy
+  if (!parameters) {
+    log('[AUTORIO] No parameters found when attacking')
+    return
+  }
+
+  const surface = player.surface
+
+  // If we have a target, check if it's still valid
+  if (parameters.target !== null) {
+    if (!parameters.target.valid) {
+      log('[AUTORIO] Target destroyed, attack task complete')
+      player.shooting_state = { state: defines.shooting.not_shooting, position: player.position }
+      task_manager.reset_task_state()
+      task_manager.next_task()
+      return
+    }
+
+    const dist = distance(player.position, parameters.target.position)
+
+    // Walk toward target if too far (approximate weapon range)
+    if (dist > 6) {
+      const direction = get_direction(player.position, parameters.target.position)
+      player.walking_state = { walking: true, direction }
+    }
+    else {
+      player.walking_state = { walking: false, direction: defines.direction.north }
+    }
+
+    player.shooting_state = { state: defines.shooting.shooting_enemies, position: parameters.target.position }
+    return
+  }
+
+  // No target yet, search for nearest enemy
+  const enemies = surface.find_entities_filtered({
+    force: 'enemy',
+    position: player.position,
+    radius: parameters.search_radius,
+  })
+
+  const nearest = get_nearest_entity(player, enemies)
+  if (nearest === null) {
+    log(`[AUTORIO] [ERROR] No enemies found within ${parameters.search_radius}m radius, ending attack task`)
+    task_manager.reset_task_state()
+    task_manager.next_task()
+    return
+  }
+
+  parameters.target = nearest
+  log(`[AUTORIO] Found enemy: ${nearest.name} at (${nearest.position.x}, ${nearest.position.y})`)
+}
+
 let no_player_found = false
 
 script.on_event(defines.events.on_tick, (unused_event) => {
@@ -915,6 +968,9 @@ script.on_event(defines.events.on_tick, (unused_event) => {
   }
   else if (task_manager.player_state.task_state === TaskStates.WAITING) {
     state_waiting()
+  }
+  else if (task_manager.player_state.task_state === TaskStates.ATTACKING) {
+    state_attacking(player)
   }
 })
 

@@ -80,9 +80,19 @@ export function new_task_manager() {
       case TaskStates.ATTACKING:
         player_state.parameters_attack_nearest_enemy = task
         break
-      case TaskStates.RESEARCHING:
+      case TaskStates.RESEARCHING: {
+        const player = game.connected_players[0]
+        if (!player) {
+          log('[AUTORIO] No player found')
+          return
+        }
+
+        const tech = player.force.technologies[task.technology_name]
+        player.force.add_research(tech)
+
         player_state.parameters_research_technology = task
         break
+      }
       case TaskStates.WAITING:
         player_state.parameters_waiting = task
         break
