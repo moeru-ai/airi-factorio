@@ -609,7 +609,7 @@ function state_placing(player: LuaPlayer) {
     return [false, 'Invalid entity name']
   }
 
-  const [item_stack, unused_count] = inventory.find_item_stack(task_manager.player_state.parameters_place_entity.entity_name)
+  const [item_stack, unused_count] = inventory.find_item_stack(item_name.name)
   if (!item_stack) {
     log('[AUTORIO] Entity not found in inventory, ending PLACING task')
     task_manager.reset_task_state()
@@ -759,7 +759,6 @@ function state_moving_items(player: LuaPlayer) {
           moved_total += removed
         }
 
-        moved_total += removed
         log(`[AUTORIO] Moved ${removed} ${parameters.item_name} from ${inventory.entity_owner?.name} inventory index ${inventory.index}`)
       })
   }
