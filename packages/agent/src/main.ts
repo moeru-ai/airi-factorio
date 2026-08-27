@@ -1,6 +1,11 @@
+import { ProxyAgent, setGlobalDispatcher } from 'undici'
+
+setGlobalDispatcher(new ProxyAgent('http://127.0.0.1:2080'))
+
 import type { MessageHandler } from './llm/message-handler'
 import type { StdoutMessage } from './parser'
 import { Buffer } from 'node:buffer'
+import { Socket } from 'node:net'
 import { Format, setGlobalFormat, useLogg } from '@guiiai/logg'
 import { backOff } from 'exponential-backoff'
 import { client, v2FactorioConsoleCommandMessagePost, v2FactorioConsoleCommandRawPost } from 'factorio-rcon-api-client'
@@ -11,6 +16,39 @@ import { parseChatMessage, parseModErrorMessage, parseOperationCompletedMessage 
 
 setGlobalFormat(Format.Pretty)
 const logger = useLogg('main').useGlobalConfig()
+
+function checkPortReady(host: string, port: number, timeout = 1000): Promise<boolean> {
+  return new Promise((resolve) => {
+    const socket = new Socket()
+    socket.setTimeout(timeout)
+    socket.once('connect', () => {
+      socket.destroy()
+      resolve(true)
+    })
+    socket.once('timeout', () => {
+      socket.destroy()
+      resolve(false)
+    })
+    socket.once('error', () => {
+      socket.destroy()
+      resolve(false)
+    })
+    socket.connect(port, host)
+  })
+}
+
+async function waitForServer(host: string, port: number, retries = 60, delay = 2000) {
+  for (let i = 0; i < retries; i++) {
+    const ready = await checkPortReady(host, port)
+    if (ready) {
+      logger.log(`Connected to Factorio server bridge at ${host}:${port}!`)
+      return
+    }
+    logger.log(`[agent] Waiting for Factorio server (${host}:${port})... (${i + 1}/${retries})`)
+    await new Promise(res => setTimeout(res, delay))
+  }
+  throw new Error(`Failed to connect to Factorio server on ${host}:${port} after ${retries} retries.`)
+}
 
 async function executeCommandFromAgent<T extends StdoutMessage>(message: T, messageHandler: MessageHandler) {
   const llmResponse = await backOff(() => messageHandler.handleMessage(message), {
@@ -49,6 +87,8 @@ async function executeCommandFromAgent<T extends StdoutMessage>(message: T, mess
 
 async function main() {
   initEnv()
+
+  await waitForServer(wsClientConfig.wsHost || 'localhost', wsClientConfig.wsPort)
 
   client.setConfig({
     baseUrl: `http://${rconClientConfig.host}:${rconClientConfig.port}`,
