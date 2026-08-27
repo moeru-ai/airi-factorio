@@ -1,0 +1,11 @@
+{
+  "name": "AIRI Server",
+  "description": "Local server",
+  "visibility": {
+    "public": false,
+    "lan": false,
+    "steam": true
+  },
+  "require_user_verification": true,
+  "max_players": 0
+}

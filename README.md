@@ -42,29 +42,21 @@ It's hard to describe the project structure in a few words, but it currently loo
 
     ```bash
     cd /path/to/airi-factorio
-
     ln -s /path/to/airi-factorio/packages/autorio/dist /path/to/factorio/data/autorio
-    # If you are using DevContainer, you can use the following command:
-    ln -s /workspace/airi-factorio/packages/autorio/dist /opt/factorio/data/autorio
     ```
 
-4. Copy and fill the `.env` file:
-
+4. Configure your environment:
+   We provide a built-in setup script to automatically configure paths and server settings (including LAN mode).
+   
     ```bash
-    cp packages/agent/.env.example packages/agent/.env.local
-    cp packages/factorio-wrapper/.env.example packages/factorio-wrapper/.env.local
+    node setup.js
     ```
+    *(Alternatively, copy `packages/agent/.env.example` and `packages/factorio-wrapper/.env.example` to `.env.local` and edit them manually).*
 
-    If you are using DevContainer, you can set `WS_SERVER_HOST` and `FACTORIO_WS_HOST` and `RCON_API_SERVER_HOST` to `localhost`.
-
-5. Create a game save file, the save file path should be the same as the one in the `.env` file:
+5. Create a game save file (ensure the path matches your configuration):
 
     ```bash
     /path/to/factorio/bin/x64/factorio --create /path/to/factorio/the-save-file.zip
-    # If you are using DevContainer, you can use the following command:
-    /opt/factorio/bin/x64/factorio --create /path/to/factorio/the-save-file.zip
-    # If your machine is not x64, you can use the following command:
-    box64 /opt/factorio/bin/x64/factorio --create /path/to/factorio/the-save-file.zip
     ```
 
 6. Run the development script:
@@ -72,6 +64,18 @@ It's hard to describe the project structure in a few words, but it currently loo
     ```bash
     pnpm run dev
     ```
+
+#### Desktop AIRI MCP Integration
+To connect the Desktop App to Factorio directly, use the provided MCP server. Update your `mcp.json` (located in `AppData/Roaming/airi/mcp.json`):
+```json
+{
+  "mcpServers": {
+    "factorio": {
+      "command": "cmd.exe",
+      "args": ["/c", "npx", "tsx", "<PATH_TO_REPO>\\packages\\factorio-service\\mcp-server.ts"]
+    }
+  }
+}
 
 Now you can use the commands in Factorio, the script will be compiled automatically, but you need to exit and re-enter the game to see the changes(no need to restart the game).
 

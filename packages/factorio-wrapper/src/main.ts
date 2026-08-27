@@ -44,6 +44,8 @@ async function main() {
     factorioConfig.rconPassword,
     '--rcon-port',
     factorioConfig.rconPort.toString(),
+    '--server-settings',
+    'server-settings.json',
   ]
 
   if (arch() === 'arm64') {
